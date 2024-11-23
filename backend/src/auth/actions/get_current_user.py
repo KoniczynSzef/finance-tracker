@@ -1,14 +1,16 @@
 from os import getenv
 
-from database.config import get_session
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from models.user import User
 from sqlmodel import Session, select
 
+from src.database.config import get_session
+
 SECRET_KEY = getenv("SECRET_KEY")
 ALGORITHM = getenv("HASHING_ALGORITHM")
+
 oauth2_scheme = Depends(OAuth2PasswordBearer(tokenUrl="token"))
 
 credentials_exception = HTTPException(

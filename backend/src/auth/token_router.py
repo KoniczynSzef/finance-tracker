@@ -1,13 +1,14 @@
 from datetime import timedelta
 from os import getenv
 
-from auth.actions.authenticate_user import authenticate_user
-from auth.actions.create_access_token import create_access_token
-from auth.schemas import Token, TokenData
-from database.config import get_session
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
+
+from src.auth.actions.authenticate_user import authenticate_user
+from src.auth.actions.create_access_token import create_access_token
+from src.auth.schemas import Token, TokenData
+from src.database.config import get_session
 
 token_router = APIRouter()
 

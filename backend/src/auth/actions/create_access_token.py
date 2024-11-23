@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 from os import getenv
 
-from auth.schemas import TokenData
 from jose import jwt
+
+from src.auth.schemas import TokenData
 
 SECRET_KEY = getenv("SECRET_KEY")
 ALGORITHM = getenv("HASHING_ALGORITHM")

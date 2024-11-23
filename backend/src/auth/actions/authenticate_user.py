@@ -1,8 +1,9 @@
-from auth.utils import is_password_valid
-from database.config import get_session
 from fastapi import Depends
-from models.user import User
 from sqlmodel import Session, select
+
+from src.auth.utils import is_password_valid
+from src.database.config import get_session
+from src.models.user import User
 
 
 def authenticate_user(username: str, password: str, session: Session = Depends(get_session)):
