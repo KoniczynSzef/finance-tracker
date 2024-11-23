@@ -5,8 +5,11 @@ from typing import Optional
 
 from sqlmodel import (
     Field,  # type: ignore
+    Relationship,
     SQLModel,
 )
+
+from src.models.user import User
 
 
 class TransactionRating(str, Enum):
@@ -34,3 +37,6 @@ class Transaction(SQLModel, table=True):
 
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime = Field(default=datetime.now())
+
+    user_id: int = Field(foreign_key="user.id", nullable=False)
+    user: "User" = Relationship(back_populates="transactions")
