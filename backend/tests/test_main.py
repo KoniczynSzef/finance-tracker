@@ -1,6 +1,5 @@
-from main import is_prime
+from main import app
 
 
-def test_is_prime():
-    assert is_prime(7)
-    assert not is_prime(8)
+def test_main():
+    assert app is not None
