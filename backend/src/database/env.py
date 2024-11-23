@@ -3,6 +3,9 @@ from logging.config import fileConfig
 
 from alembic import context
 from dotenv import load_dotenv
+from models.transaction import (
+    Transaction,  # type: ignore # noqa: F401 (imported but unused)
+)
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
