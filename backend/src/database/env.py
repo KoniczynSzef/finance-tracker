@@ -8,6 +8,9 @@ from sqlmodel import SQLModel
 from src.models.transaction import (
     Transaction,  # type: ignore # noqa: F401 (imported but unused)
 )
+from src.models.user import (
+    User,  # type: ignore # noqa: F401 (imported but unused)
+)
 
 load_dotenv()
 

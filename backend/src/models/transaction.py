@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from sqlmodel import (
     Field,  # type: ignore
@@ -9,7 +9,8 @@ from sqlmodel import (
     SQLModel,
 )
 
-from src.models.user import User
+if TYPE_CHECKING:
+    from src.models.user import User
 
 
 class TransactionRating(str, Enum):
