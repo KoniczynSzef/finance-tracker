@@ -10,7 +10,6 @@ app = FastAPI()
 
 @app.get("/")
 def health_check(session: Session = Depends(get_session)):
-    session.exec(select(Transaction))
     return {"status": "ok"}
 
 

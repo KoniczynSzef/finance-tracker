@@ -1,5 +1,11 @@
-from src.main import app
+
+
+from tests.api_setup import client
 
 
 def test_main():
-    assert app is not None
+    response = client.get("/")
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data == {"status": "ok"}

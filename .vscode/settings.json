@@ -1,10 +1,12 @@
 {
     // Python
+    "python.analysis.autoImportCompletions": true,
     "python.analysis.typeCheckingMode": "strict",
     "python.analysis.autoSearchPaths": true,
     "python.analysis.extraPaths": ["${workspaceFolder}/backend/src"],
     "python.envFile": "${workspaceFolder}/.env",
     "python.terminal.activateEnvironment": true,
+    "python.pythonPath": "${workspaceFolder}/backend/.venv/bin/python",
 
     // Python Testing
     "python.testing.pytestEnabled": true,
