@@ -1,3 +1,4 @@
+from auth.token_router import token_router
 from fastapi import Depends, FastAPI
 from sqlmodel import Session, select
 
@@ -6,6 +7,8 @@ from src.models.transaction import Transaction
 from src.models.user import User  # type: ignore # noqa: F401 (imported but unused)
 
 app = FastAPI()
+
+app.include_router(token_router)
 
 
 @app.get("/")

@@ -27,7 +27,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Dep
     except JWTError:
         raise credentials_exception
 
-    user = session.exec(select(User).where(User.id == payload["sub"])).first()
+    user = session.exec(select(User).where(
+        User.username == payload["sub"])).first()
 
     if not user:
         raise credentials_exception
