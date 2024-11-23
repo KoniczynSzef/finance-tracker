@@ -5,7 +5,10 @@ description = "A personal finance management web application designed to help us
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.14.0",
+    "fastapi-sqlalchemy>=0.2.1",
     "fastapi[standard]>=0.115.5",
+    "psycopg2-binary>=2.9.10",
 ]
 
 [dependency-groups]
