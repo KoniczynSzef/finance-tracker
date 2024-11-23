@@ -5,3 +5,4 @@ description = "A personal finance management web application designed to help us
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
+
