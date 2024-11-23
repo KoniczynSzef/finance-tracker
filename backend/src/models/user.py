@@ -2,13 +2,12 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
+from models.transaction import Transaction
 from sqlmodel import (
     Field,  # type: ignore
     Relationship,
     SQLModel,
 )
-
-from src.models.transaction import Transaction
 
 
 class User(SQLModel, table=True):
