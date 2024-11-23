@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from models.transaction import Transaction
+from src.models.transaction import Transaction
 
 
 def test_transaction():

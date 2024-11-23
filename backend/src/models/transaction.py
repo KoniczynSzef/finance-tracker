@@ -10,7 +10,7 @@ from sqlmodel import (
 )
 
 if TYPE_CHECKING:
-    from models.user import User
+    from src.models.user import User
 
 
 class TransactionRating(str, Enum):
