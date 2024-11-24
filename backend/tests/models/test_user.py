@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from models.transaction import Transaction
+from src.models.transaction import Transaction
 from src.models.user import User
 
 
@@ -58,7 +58,6 @@ def test_user_with_transactions():
 
     transaction = Transaction(name="test", amount=Decimal(
         100), user_id=user.id, user=user)
-
-    user.transactions.append(transaction)
+    # user.transactions.append(transaction)
 
     assert user.transactions == [transaction]

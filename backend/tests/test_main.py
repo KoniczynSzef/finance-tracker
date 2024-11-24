@@ -2,8 +2,6 @@
 
 from tests.api_setup import client  # type: ignore # noqa: F401
 
-client.app
-
 
 def test_main_status_code():
     response = client.get("/")

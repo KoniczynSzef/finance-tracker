@@ -10,7 +10,7 @@ engine = create_engine(DATABASE_URL, echo=True, connect_args={
                        "check_same_thread": False}, poolclass=StaticPool)
 
 
-def override_get_session():
+def mock_session():
     session = Session(engine)
 
     try:
@@ -20,7 +20,7 @@ def override_get_session():
         session.close()
 
 
-app.dependency_overrides[get_session] = override_get_session
+app.dependency_overrides[get_session] = mock_session
 
 client = TestClient(app)
 
