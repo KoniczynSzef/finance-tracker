@@ -41,3 +41,5 @@ class Transaction(SQLModel, table=True):
 
     user_id: int = Field(foreign_key="user.id", nullable=False)
     user: "User" = Relationship(back_populates="transactions")
+
+    __table_args__ = {"extend_existing": True}

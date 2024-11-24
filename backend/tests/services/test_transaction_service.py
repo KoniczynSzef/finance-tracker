@@ -2,14 +2,19 @@ from decimal import Decimal
 
 import pytest
 from src.models.transaction import Transaction
+from src.models.user import User  # type: ignore # noqa: F401
 from src.services.transaction_service import TransactionService
 
-from tests.api_setup import database_setup, mock_session
+from tests.api_setup import mock_database_create, mock_database_drop, mock_session
 
 
 @pytest.fixture(autouse=True)
-def reset_mock_session():
-    database_setup()
+def setup():
+    mock_database_create()
+
+    yield
+
+    mock_database_drop()
 
 
 def test_transaction_service_init():

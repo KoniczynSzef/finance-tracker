@@ -6,12 +6,12 @@ from sqlmodel import Session, SQLModel
 
 DATABASE_URL = "sqlite:///:memory:"
 
-engine = create_engine(DATABASE_URL, echo=True, connect_args={
-                       "check_same_thread": False}, poolclass=StaticPool)
+mock_engine = create_engine(DATABASE_URL, echo=True, connect_args={
+    "check_same_thread": False}, poolclass=StaticPool)
 
 
 def mock_session():
-    session = Session(engine)
+    session = Session(mock_engine)
 
     try:
         return session
@@ -25,9 +25,9 @@ app.dependency_overrides[get_session] = mock_session
 client = TestClient(app)
 
 
-def database_setup():
-    SQLModel.metadata.create_all(engine)
+def mock_database_create():
+    SQLModel.metadata.create_all(mock_engine)
 
-    yield
 
-    SQLModel.metadata.drop_all(engine)
+def mock_database_drop():
+    SQLModel.metadata.drop_all(mock_engine)
