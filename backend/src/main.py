@@ -15,9 +15,9 @@ def health_check():
     return {"status": "ok"}
 
 
-@app.get("/transactions")
-def get_transactions(session: Session = Depends(get_session)):
+@app.get("/transactions/{user_id}")
+def get_transactions(user_id: int, session: Session = Depends(get_session)):
     transaction_service = TransactionService(session)
-    transactions = transaction_service.get_transactions()
+    transactions = transaction_service.get_transactions_by_user_id(user_id)
 
     return {"transactions": transactions}
