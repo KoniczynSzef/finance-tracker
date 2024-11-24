@@ -3,7 +3,7 @@
     "python.analysis.autoImportCompletions": true,
     "python.analysis.typeCheckingMode": "strict",
     "python.analysis.autoSearchPaths": true,
-    "python.analysis.extraPaths": ["${workspaceFolder}/backend/src"],
+    "python.analysis.extraPaths": ["./backend/src"],
     "python.envFile": "${workspaceFolder}/.env",
     "python.terminal.activateEnvironment": true,
     "python.pythonPath": "${workspaceFolder}/backend/.venv/bin/python",

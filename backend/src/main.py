@@ -1,10 +1,9 @@
 from fastapi import Depends, FastAPI
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from src.auth.token_router import token_router
 from src.database.config import get_session
-from src.models.transaction import Transaction
-from src.models.user import User  # type: ignore # noqa: F401 (imported but unused)
+from src.services.transaction_service import TransactionService
 
 app = FastAPI()
 
@@ -18,7 +17,7 @@ def health_check():
 
 @app.get("/transactions")
 def get_transactions(session: Session = Depends(get_session)):
-
-    transactions = session.exec(select(Transaction)).all()
+    transaction_service = TransactionService(session)
+    transactions = transaction_service.get_transactions()
 
     return {"transactions": transactions}
