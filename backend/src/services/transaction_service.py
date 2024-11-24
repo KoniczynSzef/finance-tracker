@@ -12,8 +12,10 @@ class TransactionService:
     def __init__(self, session: Session = Depends(get_session)):
         self.session = session
 
-    def get_transactions(self):
-        transactions = self.session.exec(select(Transaction)).all()
+    def get_transactions_by_user_id(self, user_id: int):
+        transactions = self.session.exec(
+            select(Transaction).where(Transaction.user_id == user_id)).all()
+
         return transactions
 
     def add_transaction(self, transaction: Transaction, user: User):
@@ -40,3 +42,15 @@ class TransactionService:
         self.session.refresh(user)
 
         return user
+
+    def delete_transaction_by_id(self, transaction_id: int):
+        transaction = self.session.get(Transaction, transaction_id)
+
+        if not transaction:
+            raise ValueError(
+                "Invalid transaction: Transaction does not exist.")
+
+        self.session.delete(transaction)
+        self.session.commit()
+
+        return transaction
