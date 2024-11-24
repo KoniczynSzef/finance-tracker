@@ -2,12 +2,16 @@
 
 from tests.api_setup import client  # type: ignore # noqa: F401
 
-# client.app
+client.app
 
 
-def test_main():
-    # response = client.get("/")
-    # data = response.json()
+def test_main_status_code():
+    response = client.get("/")
 
-    assert True
-    # assert data == {"status": "ok"}
+    assert response.status_code == 200
+
+
+def test_main_response():
+    response = client.get("/")
+
+    assert response.json() == {"status": "ok"}

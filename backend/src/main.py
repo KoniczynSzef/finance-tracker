@@ -12,7 +12,7 @@ app.include_router(token_router)
 
 
 @app.get("/")
-def health_check(session: Session = Depends(get_session)):
+def health_check():
     return {"status": "ok"}
 
 
