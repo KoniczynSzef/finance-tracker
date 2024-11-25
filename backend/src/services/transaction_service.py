@@ -27,7 +27,7 @@ class TransactionService:
 
         self.session.add(transaction)
         self.update_user_balance(
-            user, transaction.is_income, transaction.amount)
+            user, transaction.is_income, Decimal(transaction.amount))
 
         return transaction
 
@@ -36,8 +36,20 @@ class TransactionService:
             raise ValueError(
                 "Invalid user: User must have an ID to update the balance.")
 
-        user.current_balance += amount if is_income else -amount
+        if amount <= 0:
+            raise ValueError(
+                "Invalid transaction: Transaction amount must be greater than 0.")
 
+        new_balance: Decimal = user.current_balance
+
+        if not is_income:
+            new_balance -= amount
+        else:
+            new_balance += amount
+
+        user.current_balance = new_balance
+
+        self.session.add(user)
         self.session.commit()
         self.session.refresh(user)
 
