@@ -89,5 +89,3 @@ class TransactionService:
         self.session.commit()
 
         return transaction
-
-    # def update_transaction_by_id(self, user: User, transaction_id: int):
