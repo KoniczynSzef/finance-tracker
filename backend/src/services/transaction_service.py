@@ -18,6 +18,20 @@ class TransactionService:
 
         return transactions
 
+    def get_transaction_by_id(self, user: User, transaction_id: int):
+        transaction = self.session.exec(select(Transaction).where(
+            Transaction.id == transaction_id)).first()
+
+        if not transaction:
+            raise ValueError(
+                "Invalid transaction: Transaction does not exist.")
+
+        if transaction.user_id != user.id:
+            raise ValueError(
+                "Invalid transaction: User does not own the transaction.")
+
+        return transaction
+
     def add_transaction(self, user: User, transaction: Transaction):
         if not user.id:
             raise ValueError(
@@ -76,16 +90,4 @@ class TransactionService:
 
         return transaction
 
-    def get_transaction_by_id(self, user: User, transaction_id: int):
-        transaction = self.session.exec(select(Transaction).where(
-            Transaction.id == transaction_id)).first()
-
-        if not transaction:
-            raise ValueError(
-                "Invalid transaction: Transaction does not exist.")
-
-        if transaction.user_id != user.id:
-            raise ValueError(
-                "Invalid transaction: User does not own the transaction.")
-
-        return transaction
+    # def update_transaction_by_id(self, user: User, transaction_id: int):
