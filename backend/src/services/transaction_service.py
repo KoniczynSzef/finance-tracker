@@ -18,7 +18,7 @@ class TransactionService:
 
         return transactions
 
-    def add_transaction(self, transaction: Transaction, user: User):
+    def add_transaction(self, user: User, transaction: Transaction):
         if not user.id:
             raise ValueError(
                 "Invalid user: User must have an ID to add a transaction.")
@@ -73,5 +73,19 @@ class TransactionService:
 
         self.session.delete(transaction)
         self.session.commit()
+
+        return transaction
+
+    def get_transaction_by_id(self, user: User, transaction_id: int):
+        transaction = self.session.exec(select(Transaction).where(
+            Transaction.id == transaction_id)).first()
+
+        if not transaction:
+            raise ValueError(
+                "Invalid transaction: Transaction does not exist.")
+
+        if transaction.user_id != user.id:
+            raise ValueError(
+                "Invalid transaction: User does not own the transaction.")
 
         return transaction
