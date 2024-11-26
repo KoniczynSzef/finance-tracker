@@ -119,29 +119,3 @@ def test_add_transaction_with_outcome(transaction_service: TransactionService):
 
     # The transaction should have the correct amount.
     assert transaction.amount == Decimal(100)
-
-
-def test_add_transaction_updates_user_balance_when_income(transaction_service: TransactionService):
-    """Test adding a transaction updates the user balance."""
-    user = User(id=1, email="test@test.com", full_name="Test User")
-    user.id = 1
-
-    transaction = transaction_service.add_transaction(
-        Transaction(user_id=user.id, user=user, name="Test Transaction", amount=Decimal(100), is_income=True), user)
-
-    # The user balance should be updated.
-    assert transaction.user == user
-    assert user.current_balance == Decimal(100)
-
-
-def test_add_transaction_updates_user_balance_when_outcome(transaction_service: TransactionService):
-    """Test adding a transaction updates the user balance."""
-    user = User(id=1, email="test@test.com", full_name="Test User")
-    user.id = 1
-
-    transaction = transaction_service.add_transaction(
-        Transaction(user_id=user.id, user=user, name="Test Transaction", amount=Decimal(100), is_income=False), user)
-
-    # The user balance should be updated.
-    assert transaction.user == user
-    assert user.current_balance == Decimal(-100)

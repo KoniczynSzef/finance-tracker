@@ -23,11 +23,15 @@ class TransactionService:
             raise ValueError(
                 "Invalid user: User must have an ID to add a transaction.")
 
+        if transaction.amount <= 0:
+            raise ValueError(
+                "Invalid transaction: Transaction amount must be greater than 0.")
+
         transaction.user_id = user.id
 
         self.session.add(transaction)
-        self.update_user_balance(
-            user, transaction.is_income, Decimal(transaction.amount))
+        self.session.commit()
+        self.session.refresh(transaction)
 
         return transaction
 
@@ -55,12 +59,17 @@ class TransactionService:
 
         return user
 
-    def delete_transaction_by_id(self, transaction_id: int):
-        transaction = self.session.get(Transaction, transaction_id)
+    def delete_transaction_by_id(self, user: User, transaction_id: int):
+        transaction = self.session.exec(select(Transaction).where(
+            Transaction.id == transaction_id)).first()
 
         if not transaction:
             raise ValueError(
                 "Invalid transaction: Transaction does not exist.")
+
+        if transaction.user_id != user.id:
+            raise ValueError(
+                "Invalid transaction: User does not own the transaction.")
 
         self.session.delete(transaction)
         self.session.commit()
