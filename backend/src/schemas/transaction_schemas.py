@@ -1,8 +1,17 @@
 from datetime import datetime
 from decimal import Decimal
+from enum import Enum
 
-from models.transaction import TransactionRating
+# from models.transaction import TransactionRating
 from pydantic import BaseModel, Field
+
+
+class TransactionRating(str, Enum):
+    SATISFIED = "SATISFIED"
+    NEUTRAL = "NEUTRAL"
+    REGRETFUL = "REGRETFUL"
+    DISLIKE = "DISLIKE"
+    IMPORTANT = "IMPORTANT"
 
 
 class TransactionBase(BaseModel):

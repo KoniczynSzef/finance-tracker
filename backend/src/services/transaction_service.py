@@ -1,11 +1,17 @@
 from decimal import Decimal
 
 from fastapi import Depends
+
+# from schemas.transaction_schemas import TransactionRead
 from sqlmodel import Session, select
 
 from src.database.config import get_session
 from src.models.transaction import Transaction
 from src.models.user import User
+from src.schemas.transaction_schemas import (  # type: ignore # noqa: F401
+    TransactionCreate,
+    TransactionRead,
+)
 
 
 class TransactionService:
@@ -16,7 +22,7 @@ class TransactionService:
         transactions = self.session.exec(
             select(Transaction).where(Transaction.user_id == user_id)).all()
 
-        return transactions
+        return [TransactionRead(**transaction.model_dump()) for transaction in transactions]
 
     def get_transaction_by_id(self, user: User, transaction_id: int):
         transaction = self.session.exec(select(Transaction).where(
@@ -32,22 +38,24 @@ class TransactionService:
 
         return transaction
 
-    def add_transaction(self, user: User, transaction: Transaction):
+    def add_transaction(self, user: User, transaction: TransactionCreate):
         if not user.id:
             raise ValueError(
                 "Invalid user: User must have an ID to add a transaction.")
 
-        if transaction.amount <= 0:
-            raise ValueError(
-                "Invalid transaction: Transaction amount must be greater than 0.")
+        new_transaction = Transaction(**transaction.model_dump())
+        new_transaction.user_id = user.id
 
-        transaction.user_id = user.id
+        self.session.add(new_transaction)
+        user.transactions.append(new_transaction)
 
-        self.session.add(transaction)
+        self.session.add(user)
         self.session.commit()
-        self.session.refresh(transaction)
 
-        return transaction
+        self.session.refresh(new_transaction)
+        self.session.refresh(user)
+
+        return TransactionRead(**new_transaction.model_dump())
 
     def update_user_balance(self, user: User, is_income: bool, amount: Decimal):
         if not user.id:
@@ -88,4 +96,4 @@ class TransactionService:
         self.session.delete(transaction)
         self.session.commit()
 
-        return transaction
+        return TransactionRead(**transaction.model_dump())

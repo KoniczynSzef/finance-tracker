@@ -1,11 +1,12 @@
 from decimal import Decimal
 
 import pytest
+from pydantic import ValidationError
+from schemas.transaction_schemas import TransactionCreate
 from services.transaction_service import TransactionService
 from sqlmodel import select
 from src.models.transaction import Transaction
 from src.models.user import User
-
 from tests.api_setup import mock_database_create, mock_database_drop, mock_session
 
 
@@ -35,9 +36,11 @@ def test_add_transaction_with_invalid_amount(transaction_service: TransactionSer
     user.id = 1
 
     # The amount should be required to add a transaction.
-    with pytest.raises(ValueError):
+    with pytest.raises(ValidationError):
         transaction_service.add_transaction(user,
-                                            Transaction(user_id=user.id, user=user, name="Test Transaction", amount=Decimal(0)))
+                                            TransactionCreate(user_id=user.id, name="Test Transaction", amount=Decimal(0)))
+        transaction_service.add_transaction(user,
+                                            TransactionCreate(user_id=user.id, name="Test Transaction", amount=Decimal(-100)))
 
 
 def test_add_transaction_with_valid_amount(transaction_service: TransactionService):
@@ -46,7 +49,7 @@ def test_add_transaction_with_valid_amount(transaction_service: TransactionServi
     user.id = 1
 
     transaction = transaction_service.add_transaction(user,
-                                                      Transaction(user_id=user.id, user=user, name="Test Transaction", amount=Decimal(100)))
+                                                      TransactionCreate(user_id=user.id, name="Test Transaction", amount=Decimal(100)))
 
     # The transaction should have the correct amount.
     assert transaction.amount == Decimal(100)
@@ -58,7 +61,7 @@ def test_add_transaction_update_the_database(transaction_service: TransactionSer
     user.id = 1
 
     created_transaction = transaction_service.add_transaction(user,
-                                                              Transaction(user_id=user.id, user=user, name="Test Transaction", amount=Decimal(100)))
+                                                              TransactionCreate(user_id=user.id, name="Test Transaction", amount=Decimal(100)))
 
     session = mock_session()
     transaction = session.exec(select(Transaction).where(
@@ -76,11 +79,12 @@ def test_add_transaction_with_invalid_user_id(transaction_service: TransactionSe
     """Test adding a transaction with an invalid user ID."""
 
     user = User(email="test@test.com", full_name="Test User")
+    user.id = 0
 
     # The user ID should be required to add a transaction.
     with pytest.raises(ValueError):
         transaction_service.add_transaction(user,
-                                            Transaction(user_id=0, user=user, name="Test Transaction", amount=Decimal(100)))
+                                            TransactionCreate(user_id=user.id, name="Test Transaction", amount=Decimal(100)))
 
 
 def test_add_transaction_with_valid_user_id(transaction_service: TransactionService):
@@ -90,11 +94,10 @@ def test_add_transaction_with_valid_user_id(transaction_service: TransactionServ
     user.id = 1
 
     transaction = transaction_service.add_transaction(user,
-                                                      Transaction(user_id=user.id, user=user, name="Test Transaction", amount=Decimal(100)))
+                                                      TransactionCreate(user_id=user.id, name="Test Transaction", amount=Decimal(100)))
 
     # The transaction should have the correct user ID and user object.
     assert transaction.user_id == user.id
-    assert transaction.user == user
 
 
 def test_add_transaction_with_income(transaction_service: TransactionService):
@@ -103,7 +106,7 @@ def test_add_transaction_with_income(transaction_service: TransactionService):
     user.id = 1
 
     transaction = transaction_service.add_transaction(user,
-                                                      Transaction(user_id=user.id, user=user, name="Test Transaction", amount=Decimal(500), is_income=True))
+                                                      TransactionCreate(user_id=user.id, name="Test Transaction", is_income=True, amount=Decimal(500)))
 
     # The transaction should have the correct amount.
     assert transaction.amount == Decimal(500)
@@ -115,7 +118,7 @@ def test_add_transaction_with_outcome(transaction_service: TransactionService):
     user.id = 1
 
     transaction = transaction_service.add_transaction(user,
-                                                      Transaction(user_id=user.id, user=user, name="Test Transaction", amount=Decimal(100), is_income=False))
+                                                      TransactionCreate(user_id=user.id, name="Test Transaction", is_income=False, amount=Decimal(100)))
 
     # The transaction should have the correct amount.
     assert transaction.amount == Decimal(100)
