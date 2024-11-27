@@ -23,17 +23,17 @@ class TransactionBase(BaseModel):
 
 
 class TransactionCreate(TransactionBase):
-    user_id: int = Field(default=0)
+    user_id: int = Field()
 
 
 class TransactionUpdate(TransactionBase):
-    # TODO: add every field as optional
-    pass
+    id: int = Field()
+    user_id: int = Field()
 
 
 class TransactionRead(TransactionBase):
-    id: int = Field(default=0)
-    user_id: int = Field(default=0)
+    id: int = Field()
+    user_id: int = Field()
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
