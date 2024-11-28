@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 from fastapi import Depends
@@ -38,6 +39,18 @@ class TransactionService:
                 "Invalid transaction: User does not own the transaction.")
 
         return transaction
+
+    def get_transactions_by_category(self, user_id: int, category: str):
+        transactions = self.session.exec(
+            select(Transaction).where(Transaction.user_id == user_id, Transaction.category == category)).all()
+
+        return [TransactionRead(**transaction.model_dump()) for transaction in transactions]
+
+    def get_transactions_in_date_range(self, user_id: int, start_date: datetime, end_date: datetime):
+        transactions = self.session.exec(select(Transaction).where(
+            Transaction.user_id == user_id, Transaction.date >= start_date, Transaction.date <= end_date)).all()
+
+        return [TransactionRead(**transaction.model_dump()) for transaction in transactions]
 
     def add_transaction(self, user: User, transaction: TransactionCreate):
         if not user.id:
@@ -118,3 +131,15 @@ class TransactionService:
         self.session.commit()
 
         return TransactionRead(**transaction.model_dump())
+
+    def delete_all_transactions_by_user_id(self, user_id: int):
+        transactions = self.session.exec(
+            select(Transaction).where(Transaction.user_id == user_id)).all()
+
+        for transaction in transactions:
+            self.session.delete(transaction)
+
+        self.session.commit()
+        self.session.refresh(user_id)
+
+        return "Transactions deleted successfully."
