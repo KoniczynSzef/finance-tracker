@@ -6,7 +6,6 @@ from services.transaction_service import TransactionService
 from sqlmodel import select
 from src.models.transaction import Transaction
 from src.models.user import User
-
 from tests.api_setup import mock_database_create, mock_database_drop, mock_session
 
 
@@ -38,22 +37,7 @@ def test_delete_transaction_by_id_with_invalid_transaction_id(transaction_servic
     """Test deleting a transaction with an invalid transaction ID."""
 
     with pytest.raises(ValueError):
-        transaction_service.delete_transaction_by_id(user, 0)
-
-
-def test_delete_transaction_by_id_with_invalid_user_id(transaction_service: TransactionService, user: User):
-    """Test deleting a transaction with an invalid user ID."""
-    user.id = None
-
-    with pytest.raises(ValueError):
-        transaction_service.delete_transaction_by_id(user, 1)
-
-
-def test_delete_transaction_when_transaction_does_not_exist(transaction_service: TransactionService, user: User):
-    """Test deleting a transaction when the transaction does not exist."""
-
-    with pytest.raises(ValueError):
-        transaction_service.delete_transaction_by_id(user, 1)
+        transaction_service.delete_transaction_by_id(0, 0)
 
 
 def test_delete_transaction_when_user_does_not_own_transaction(transaction_service: TransactionService, user: User):
@@ -65,7 +49,7 @@ def test_delete_transaction_when_user_does_not_own_transaction(transaction_servi
     transaction.id = 1
 
     with pytest.raises(ValueError):
-        transaction_service.delete_transaction_by_id(user, transaction.id)
+        transaction_service.delete_transaction_by_id(transaction.id, user.id)
 
 
 def test_delete_transaction(transaction_service: TransactionService, user: User):
@@ -84,7 +68,7 @@ def test_delete_transaction(transaction_service: TransactionService, user: User)
     session.refresh(transaction)
 
     # Now transaction should exist in the database and the user's balance should be updated.
-    transaction_service.delete_transaction_by_id(user, transaction.id)
+    transaction_service.delete_transaction_by_id(transaction.id, user.id)
 
     deleted_transaction = session.exec(select(Transaction).where(
         Transaction.id == transaction.id)).first()

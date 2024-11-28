@@ -11,6 +11,7 @@ from src.models.user import User
 from src.schemas.transaction_schemas import (  # type: ignore # noqa: F401
     TransactionCreate,
     TransactionRead,
+    TransactionUpdate,
 )
 
 
@@ -24,7 +25,7 @@ class TransactionService:
 
         return [TransactionRead(**transaction.model_dump()) for transaction in transactions]
 
-    def get_transaction_by_id(self, user: User, transaction_id: int):
+    def get_transaction_by_id(self, transaction_id: int, user_id: int):
         transaction = self.session.exec(select(Transaction).where(
             Transaction.id == transaction_id)).first()
 
@@ -32,7 +33,7 @@ class TransactionService:
             raise ValueError(
                 "Invalid transaction: Transaction does not exist.")
 
-        if transaction.user_id != user.id:
+        if transaction.user_id != user_id:
             raise ValueError(
                 "Invalid transaction: User does not own the transaction.")
 
@@ -81,7 +82,27 @@ class TransactionService:
 
         return user
 
-    def delete_transaction_by_id(self, user: User, transaction_id: int):
+    def update_transaction_by_id(self, transaction_id: int, user_id: int, transaction: TransactionUpdate):
+        existing_transaction = self.session.exec(select(Transaction).where(
+            Transaction.id == transaction_id)).first()
+
+        if not existing_transaction:
+            raise ValueError(
+                "Invalid transaction: Transaction does not exist.")
+
+        if existing_transaction.user_id != user_id:
+            raise ValueError(
+                "Invalid transaction: User does not own the transaction.")
+
+        existing_transaction = Transaction(**transaction.model_dump())
+
+        self.session.add(existing_transaction)
+        self.session.commit()
+        self.session.refresh(existing_transaction)
+
+        return TransactionRead(**existing_transaction.model_dump())
+
+    def delete_transaction_by_id(self, transaction_id: int, user_id: int):
         transaction = self.session.exec(select(Transaction).where(
             Transaction.id == transaction_id)).first()
 
@@ -89,7 +110,7 @@ class TransactionService:
             raise ValueError(
                 "Invalid transaction: Transaction does not exist.")
 
-        if transaction.user_id != user.id:
+        if transaction.user_id != user_id:
             raise ValueError(
                 "Invalid transaction: User does not own the transaction.")
 

@@ -4,7 +4,6 @@ import pytest
 from services.transaction_service import TransactionService
 from src.models.transaction import Transaction
 from src.models.user import User
-
 from tests.api_setup import mock_database_create, mock_database_drop, mock_session
 
 
@@ -37,7 +36,7 @@ def test_get_transaction_by_id_with_invalid_user_id(transaction_service: Transac
     user.id = None
 
     with pytest.raises(ValueError):
-        transaction_service.get_transaction_by_id(user, 1)
+        transaction_service.get_transaction_by_id(0, 0)
 
 
 def test_get_transaction_by_id_with_invalid_transaction_id(transaction_service: TransactionService, user: User):
@@ -45,7 +44,7 @@ def test_get_transaction_by_id_with_invalid_transaction_id(transaction_service: 
     user.id = 1
 
     with pytest.raises(ValueError):
-        transaction_service.get_transaction_by_id(user, 1)
+        transaction_service.get_transaction_by_id(0, 1)
 
 
 def test_get_transaction_by_id_with_valid_transaction_id(transaction_service: TransactionService, user: User):
@@ -61,4 +60,4 @@ def test_get_transaction_by_id_with_valid_transaction_id(transaction_service: Tr
     session.commit()
 
     assert transaction_service.get_transaction_by_id(
-        user, transaction.id) == transaction
+        transaction.id, user.id) == transaction
