@@ -1,13 +1,12 @@
 from fastapi import Depends, FastAPI
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from src.auth.token_router import token_router
 from src.database.config import get_session
-from src.services.transaction_service import TransactionService
+from src.models.user import User
+from src.routes.transaction_routes import transaction_router
 
 app = FastAPI()
-
-app.include_router(token_router)
 
 
 @app.get("/")
@@ -15,9 +14,18 @@ def health_check():
     return {"status": "ok"}
 
 
-@app.get("/transactions/{user_id}")
-def get_transactions(user_id: int, session: Session = Depends(get_session)):
-    transaction_service = TransactionService(session)
-    transactions = transaction_service.get_transactions_by_user_id(user_id)
+@app.get("/all-users")
+def get_all_users(session: Session = Depends(get_session)):
+    return session.exec(select(User)).all()
 
-    return {"transactions": transactions}
+
+@app.post("/create-sample-user")
+def create_sample_user(user: User, session: Session = Depends(get_session)):
+    session.add(user)
+    session.commit()
+
+    return {"created_user": user.username}
+
+
+app.include_router(token_router)
+app.include_router(transaction_router)
