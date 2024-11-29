@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 from src.database.config import get_session
 from src.models.user import User
 from src.schemas.transaction_schemas import (
+    TransactionBase,
     TransactionCreate,
     TransactionRead,
 )
@@ -53,6 +54,17 @@ def create_transaction(user_id: int, transaction: TransactionCreate, session: Se
 # TODO: Implement update transaction endpoint
 
 
+@transaction_router.put("/{transaction_id}", response_model=TransactionRead)
+def update_transaction(user_id: int, transaction_id: int, transaction: TransactionBase, session: Session = Depends(get_session)):
+    transaction_service = TransactionService(session)
+
+    try:
+        return transaction_service.update_transaction_by_id(transaction_id=transaction_id, user_id=user_id, transaction=transaction)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=e.args[0], headers={"WWW-Authenticate": "Bearer"})
+
+
 @ transaction_router.delete("/{transaction_id}", response_model=TransactionRead)
 def delete_transaction(user_id: int, transaction_id: int, session: Session = Depends(get_session)):
     transaction_service = TransactionService(session)
@@ -64,7 +76,7 @@ def delete_transaction(user_id: int, transaction_id: int, session: Session = Dep
                             detail=e.args[0], headers={"WWW-Authenticate": "Bearer"})
 
 
-@ transaction_router.delete("/all/{user_id}", response_model=str)
-def delete_all_transaction(user_id: int, transaction_id: int, session: Session = Depends(get_session)):
+@ transaction_router.delete("/all/{user_id}")
+def delete_all_transaction(user_id: int,  session: Session = Depends(get_session)):
     transaction_service = TransactionService(session)
     return transaction_service.delete_all_transactions_by_user_id(user_id=user_id)

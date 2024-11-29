@@ -7,12 +7,12 @@ from fastapi import Depends
 from sqlmodel import Session, select
 
 from src.database.config import get_session
-from src.models.transaction import Transaction
+from src.models.transaction import Transaction, TransactionRating
 from src.models.user import User
 from src.schemas.transaction_schemas import (  # type: ignore # noqa: F401
+    TransactionBase,
     TransactionCreate,
     TransactionRead,
-    TransactionUpdate,
 )
 
 
@@ -95,7 +95,7 @@ class TransactionService:
 
         return user
 
-    def update_transaction_by_id(self, transaction_id: int, user_id: int, transaction: TransactionUpdate):
+    def update_transaction_by_id(self, transaction_id: int, user_id: int, transaction: TransactionBase):
         existing_transaction = self.session.exec(select(Transaction).where(
             Transaction.id == transaction_id)).first()
 
@@ -107,7 +107,18 @@ class TransactionService:
             raise ValueError(
                 "Invalid transaction: User does not own the transaction.")
 
-        existing_transaction = Transaction(**transaction.model_dump())
+        existing_transaction.name = transaction.name
+        existing_transaction.description = transaction.description
+        existing_transaction.category = transaction.category
+        existing_transaction.tags = transaction.tags
+        existing_transaction.date = transaction.date
+        existing_transaction.amount = transaction.amount
+        existing_transaction.currency = transaction.currency
+        existing_transaction.is_income = transaction.is_income
+        existing_transaction.rating = TransactionRating[transaction.rating]
+        existing_transaction.is_recurring = transaction.is_recurring
+        existing_transaction.recurrence_period_in_days = transaction.recurrence_period_in_days
+        existing_transaction.updated_at = datetime.now()
 
         self.session.add(existing_transaction)
         self.session.commit()
@@ -140,6 +151,5 @@ class TransactionService:
             self.session.delete(transaction)
 
         self.session.commit()
-        self.session.refresh(user_id)
 
         return "Transactions deleted successfully."
