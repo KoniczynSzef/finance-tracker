@@ -9,6 +9,7 @@ from sqlmodel import Session, select
 from src.database.config import get_session
 from src.models.transaction import Transaction, TransactionRating
 from src.models.user import User
+from src.schemas.errors import InvalidCredentials, NotFound, ValidationError
 from src.schemas.transaction_schemas import (  # type: ignore # noqa: F401
     TransactionBase,
     TransactionCreate,
@@ -31,11 +32,11 @@ class TransactionService:
             Transaction.id == transaction_id)).first()
 
         if not transaction:
-            raise ValueError(
+            raise NotFound(
                 "Invalid transaction: Transaction does not exist.")
 
         if transaction.user_id != user_id:
-            raise ValueError(
+            raise InvalidCredentials(
                 "Invalid transaction: User does not own the transaction.")
 
         return transaction
@@ -54,7 +55,7 @@ class TransactionService:
 
     def add_transaction(self, user: User, transaction: TransactionCreate):
         if not user.id:
-            raise ValueError(
+            raise InvalidCredentials(
                 "Invalid user: User must have an ID to add a transaction.")
 
         new_transaction = Transaction(**transaction.model_dump())
@@ -73,11 +74,11 @@ class TransactionService:
 
     def update_user_balance(self, user: User, is_income: bool, amount: Decimal):
         if not user.id:
-            raise ValueError(
+            raise InvalidCredentials(
                 "Invalid user: User must have an ID to update the balance.")
 
         if amount <= 0:
-            raise ValueError(
+            raise ValidationError(
                 "Invalid transaction: Transaction amount must be greater than 0.")
 
         new_balance: Decimal = user.current_balance
@@ -100,11 +101,11 @@ class TransactionService:
             Transaction.id == transaction_id)).first()
 
         if not existing_transaction:
-            raise ValueError(
+            raise NotFound(
                 "Invalid transaction: Transaction does not exist.")
 
         if existing_transaction.user_id != user_id:
-            raise ValueError(
+            raise InvalidCredentials(
                 "Invalid transaction: User does not own the transaction.")
 
         existing_transaction.name = transaction.name
@@ -131,11 +132,11 @@ class TransactionService:
             Transaction.id == transaction_id)).first()
 
         if not transaction:
-            raise ValueError(
+            raise NotFound(
                 "Invalid transaction: Transaction does not exist.")
 
         if transaction.user_id != user_id:
-            raise ValueError(
+            raise InvalidCredentials(
                 "Invalid transaction: User does not own the transaction.")
 
         self.session.delete(transaction)
@@ -146,6 +147,9 @@ class TransactionService:
     def delete_all_transactions_by_user_id(self, user_id: int):
         transactions = self.session.exec(
             select(Transaction).where(Transaction.user_id == user_id)).all()
+
+        if len(transactions) == 0:
+            return "No transactions to delete."
 
         for transaction in transactions:
             self.session.delete(transaction)
