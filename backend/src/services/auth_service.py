@@ -7,6 +7,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlmodel import Session, select
 
+from src.auth.schemas import Token
 from src.database.config import get_session
 from src.models.user import User
 from src.schemas.auth_schemas import TokenData
@@ -29,6 +30,34 @@ class AuthService:
         self.password_context = password_context
         self.oauth2_scheme = Depends(
             OAuth2PasswordBearer(tokenUrl="auth/token"))
+
+    def register_user(self, user: User):
+        existing_user = self.session.exec(select(User).where(
+            User.username == user.username)).first()
+
+        if existing_user:
+            raise ValueError("User already exists.")
+
+        self.session.add(user)
+        self.session.commit()
+        self.session.refresh(user)
+
+        return user
+
+    def login_user(self, username: str, password: str) -> Token:
+        existing_user = self.session.exec(select(User).where(
+            User.username == username)).first()
+
+        if not existing_user:
+            raise credentials_exception
+
+        if not self.is_password_valid(password, existing_user.hashed_password):
+            raise credentials_exception
+
+        token = self.create_access_token(
+            token_data=TokenData(sub=existing_user.username, exp=datetime.now().microsecond))
+
+        return Token(access_token=token, token_type="bearer")
 
     def authenticate_user(self, username: str, password: str):
         user = self.session.exec(select(User).where(
