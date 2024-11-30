@@ -35,11 +35,6 @@ class TransactionCreate(TransactionBase):
     user_id: int = Field()
 
 
-class TransactionUpdate(TransactionBase):
-    id: int = Field()
-    user_id: int = Field()
-
-
 class TransactionRead(TransactionBase):
     id: int = Field()
     user_id: int = Field()
