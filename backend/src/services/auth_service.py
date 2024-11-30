@@ -11,6 +11,7 @@ from src.auth.schemas import Token
 from src.database.config import get_session
 from src.models.user import User
 from src.schemas.auth_schemas import TokenData
+from src.schemas.user_schemas import UserCreate, UserRead
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -31,18 +32,22 @@ class AuthService:
         self.oauth2_scheme = Depends(
             OAuth2PasswordBearer(tokenUrl="auth/token"))
 
-    def register_user(self, user: User):
+    def register_user(self, user: UserCreate):
         existing_user = self.session.exec(select(User).where(
             User.username == user.username)).first()
 
         if existing_user:
             raise ValueError("User already exists.")
 
-        self.session.add(user)
-        self.session.commit()
-        self.session.refresh(user)
+        new_user = User(**user.model_dump())
 
-        return user
+        new_user.hashed_password = self.hash_password(user.password)
+
+        self.session.add(new_user)
+        self.session.commit()
+        self.session.refresh(new_user)
+
+        return UserRead(**new_user.model_dump())
 
     def login_user(self, username: str, password: str) -> Token:
         existing_user = self.session.exec(select(User).where(

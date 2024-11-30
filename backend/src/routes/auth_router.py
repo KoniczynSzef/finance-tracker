@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 from src.database.config import get_session
 from src.schemas.auth_schemas import Token, TokenData
+from src.schemas.user_schemas import UserCreate, UserRead
 from src.services.auth_service import AuthService, credentials_exception
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
@@ -19,6 +20,17 @@ def create_access_token(token_data: TokenData, session: Session = Depends(get_se
     auth_service = AuthService(session)
 
     return auth_service.create_access_token(token_data)
+
+
+@auth_router.post("/register", response_model=UserRead)
+def register_user(user: UserCreate, session: Session = Depends(get_session)):
+    auth_service = AuthService(session)
+
+    try:
+        return auth_service.register_user(user)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=e.args[0], headers={"WWW-Authenticate": "Bearer"})
 
 
 @auth_router.post("/login", response_model=Token)
