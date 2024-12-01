@@ -20,7 +20,8 @@ class TransactionBase(BaseModel):
         default="")
     category: str = Field(default="General")
     is_income: bool = Field(default=False)
-    amount: Decimal = Field(..., gt=0)
+    amount: Decimal = Field(..., gt=0,
+                            description="Transaction amount must be greater than 0.")
     date: datetime = Field(default_factory=datetime.now)
     currency: str = Field(default="USD")
     tags: str = Field(default="")

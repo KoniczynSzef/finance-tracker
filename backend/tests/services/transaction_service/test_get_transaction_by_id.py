@@ -4,6 +4,7 @@ import pytest
 from services.transaction_service import TransactionService
 from src.models.transaction import Transaction
 from src.models.user import User
+from src.schemas.errors import NotFound
 from tests.api_setup import mock_database_create, mock_database_drop, mock_session
 
 
@@ -31,20 +32,19 @@ def test_get_transaction_by_id(transaction_service: TransactionService, user: Us
     assert callable(transaction_service.get_transaction_by_id)
 
 
+def test_get_transaction_by_id_that_does_not_exist(transaction_service: TransactionService):
+    """Test getting a transaction that does not exist."""
+
+    with pytest.raises(NotFound, match="Invalid transaction: Transaction does not exist."):
+        transaction_service.get_transaction_by_id(0, 1)
+
+
 def test_get_transaction_by_id_with_invalid_user_id(transaction_service: TransactionService, user: User):
     """Test getting a transaction with an invalid user ID."""
     user.id = None
 
     with pytest.raises(ValueError):
         transaction_service.get_transaction_by_id(0, 0)
-
-
-def test_get_transaction_by_id_with_invalid_transaction_id(transaction_service: TransactionService, user: User):
-    """Test getting a transaction with an invalid transaction ID."""
-    user.id = 1
-
-    with pytest.raises(ValueError):
-        transaction_service.get_transaction_by_id(0, 1)
 
 
 def test_get_transaction_by_id_with_valid_transaction_id(transaction_service: TransactionService, user: User):

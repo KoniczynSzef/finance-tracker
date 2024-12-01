@@ -51,15 +51,24 @@ def create_transaction(user_id: int, transaction: TransactionCreate, session: Se
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=e.args[0], headers={"WWW-Authenticate": "Bearer"})
 
-# TODO: Implement update transaction endpoint
-
 
 @transaction_router.put("/{transaction_id}", response_model=TransactionRead)
 def update_transaction(user_id: int, transaction_id: int, transaction: TransactionBase, session: Session = Depends(get_session)):
     transaction_service = TransactionService(session)
 
+    user = session.exec(select(User).where(User.id == user_id)).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="User not found", headers={"WWW-Authenticate": "Bearer"})
+
     try:
-        return transaction_service.update_transaction_by_id(transaction_id=transaction_id, user_id=user_id, transaction=transaction)
+        updated_transaction = transaction_service.update_transaction_by_id(
+            transaction_id=transaction_id, user_id=user_id, transaction=transaction)
+
+        transaction_service.update_user_balance(
+            user=user, is_income=updated_transaction.is_income, amount=updated_transaction.amount)
+
+        return updated_transaction
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=e.args[0], headers={"WWW-Authenticate": "Bearer"})

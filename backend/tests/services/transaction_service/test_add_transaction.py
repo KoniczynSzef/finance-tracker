@@ -7,6 +7,7 @@ from services.transaction_service import TransactionService
 from sqlmodel import select
 from src.models.transaction import Transaction
 from src.models.user import User
+from src.schemas.errors import InvalidCredentials
 from tests.api_setup import mock_database_create, mock_database_drop, mock_session
 
 
@@ -37,10 +38,8 @@ def test_add_transaction_with_invalid_amount(transaction_service: TransactionSer
 
     # The amount should be required to add a transaction.
     with pytest.raises(ValidationError):
-        transaction_service.add_transaction(user,
-                                            TransactionCreate(user_id=user.id, name="Test Transaction", amount=Decimal(0)))
-        transaction_service.add_transaction(user,
-                                            TransactionCreate(user_id=user.id, name="Test Transaction", amount=Decimal(-100)))
+        transaction_service.add_transaction(user, TransactionCreate(
+            user_id=user.id, name="Test Transaction", amount=Decimal(0)))
 
 
 def test_add_transaction_with_valid_amount(transaction_service: TransactionService):
@@ -82,7 +81,7 @@ def test_add_transaction_with_invalid_user_id(transaction_service: TransactionSe
     user.id = 0
 
     # The user ID should be required to add a transaction.
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidCredentials):
         transaction_service.add_transaction(user,
                                             TransactionCreate(user_id=user.id, name="Test Transaction", amount=Decimal(100)))
 
