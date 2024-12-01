@@ -6,6 +6,7 @@ from services.transaction_service import TransactionService
 from sqlmodel import select
 from src.models.transaction import Transaction
 from src.models.user import User
+from src.schemas.errors import InvalidCredentials, NotFound
 from tests.api_setup import mock_database_create, mock_database_drop, mock_session
 
 
@@ -31,15 +32,21 @@ def test_update_transaction_by_id(transaction_service: TransactionService):
 def test_update_transaction_by_id_with_invalid_transaction_id(transaction_service: TransactionService):
     """Test the function returns None when the transaction id is invalid."""
 
-    with pytest.raises(ValueError, match="Invalid transaction: Transaction does not exist."):
+    with pytest.raises(NotFound, match="Invalid transaction: Transaction does not exist."):
         transaction_service.update_transaction_by_id(0, 0, transaction=TransactionBase(
             name="Test Transaction", is_income=False, amount=Decimal(100)))
 
 
-def test_update_transaction_by_id_with_invalid_user_id(transaction_service: TransactionService):
+def test_update_transaction_by_id_when_user_does_not_own_transaction(transaction_service: TransactionService):
     """Test the function returns None when the user id is invalid."""
+    transaction = Transaction(id=1, name="Test Transaction",
+                              is_income=False, amount=Decimal(100), user_id=1)
 
-    with pytest.raises(ValueError, match="Invalid transaction: Transaction does not exist."):
+    session = mock_session()
+    session.add(transaction)
+    session.commit()
+
+    with pytest.raises(InvalidCredentials, match="Invalid transaction: User does not own the transaction."):
         transaction_service.update_transaction_by_id(1, 0, transaction=TransactionBase(
             name="Test Transaction", is_income=False, amount=Decimal(100)))
 

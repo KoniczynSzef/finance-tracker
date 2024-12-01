@@ -14,7 +14,7 @@ class NotFound(Exception):
         return self.message
 
 
-class NotValidated(Exception):
+class ValidationError(Exception):
     def __init__(self, message: str):
         self.message = message
 

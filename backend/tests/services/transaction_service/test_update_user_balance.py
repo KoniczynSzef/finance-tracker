@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 from services.transaction_service import TransactionService
 from src.models.user import User
-
+from src.schemas.errors import InvalidCredentials, ValidationError
 from tests.api_setup import mock_database_create, mock_database_drop, mock_session
 
 
@@ -26,13 +26,13 @@ def test_update_user_balance(transaction_service: TransactionService):
     assert callable(transaction_service.update_user_balance)
 
 
-def test_update_user_balance_with_invalid_user_id(transaction_service: TransactionService):
-    """Test updating a user balance with an invalid user ID."""
+def test_update_user_balance_when_user_does_not_exist(transaction_service: TransactionService):
+    """Test updating a user balance when the user does not exist."""
     user = User(id=1, email="test@test.com", full_name="Test User")
-    user.id = None
+    user.id = 0
 
     # The user ID should be required to update a user balance.
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidCredentials):
         transaction_service.update_user_balance(
             user, is_income=True, amount=Decimal(100))
 
@@ -42,12 +42,17 @@ def test_update_user_balance_with_invalid_amount(transaction_service: Transactio
     user = User(id=1, email="test@test.com", full_name="Test User")
     user.id = 1
 
+    session = mock_session()
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
     # The amount should be required to update a user balance.
-    with pytest.raises(ValueError):
+    with pytest.raises(ValidationError):
         transaction_service.update_user_balance(
             user, is_income=False, amount=Decimal(0))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValidationError):
         transaction_service.update_user_balance(
             user, is_income=False, amount=Decimal(-100))
 

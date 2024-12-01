@@ -4,13 +4,12 @@ from decimal import Decimal
 from fastapi import Depends
 
 # from schemas.transaction_schemas import TransactionRead
-from pydantic import ValidationError
 from sqlmodel import Session, select
 
 from src.database.config import get_session
 from src.models.transaction import Transaction, TransactionRating
 from src.models.user import User
-from src.schemas.errors import InvalidCredentials, NotFound, NotValidated
+from src.schemas.errors import InvalidCredentials, NotFound, ValidationError
 from src.schemas.transaction_schemas import (  # type: ignore # noqa: F401
     TransactionBase,
     TransactionCreate,
@@ -64,7 +63,7 @@ class TransactionService:
             new_transaction.user_id = user.id
             new_transaction.user = user
         except ValidationError as e:
-            raise NotValidated(e.args[0])
+            raise ValidationError(e.args[0])
 
         self.session.add(new_transaction)
         user.transactions.append(new_transaction)
@@ -83,7 +82,7 @@ class TransactionService:
                 "Invalid user: User must have an ID to update the balance.")
 
         if amount <= 0:
-            raise NotValidated(
+            raise ValidationError(
                 "Invalid transaction: Transaction amount must be greater than 0.")
 
         new_balance: Decimal = user.current_balance
