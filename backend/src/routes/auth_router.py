@@ -1,4 +1,7 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 from src.database.config import get_session
 from src.schemas.auth_schemas import Token, TokenData
@@ -8,7 +11,7 @@ from src.services.auth_service import AuthService, credentials_exception
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@auth_router.get("/current_user")
+@auth_router.get("/me")
 def get_current_user(token: str, session: Session = Depends(get_session)):
     auth_service = AuthService(session)
 
@@ -34,10 +37,10 @@ def register_user(user: UserCreate, session: Session = Depends(get_session)):
 
 
 @auth_router.post("/login", response_model=Token)
-def login_user(username: str, password: str, session: Session = Depends(get_session)):
+def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: Session = Depends(get_session)):
     auth_service = AuthService(session)
 
     try:
-        return auth_service.login_user(username, password)
+        return auth_service.login_user(form_data.username, form_data.password)
     except Exception:
         raise credentials_exception

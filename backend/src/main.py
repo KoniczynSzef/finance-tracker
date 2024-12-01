@@ -1,7 +1,6 @@
 from fastapi import Depends, FastAPI
 from sqlmodel import Session, select
 
-from src.auth.token_router import token_router
 from src.database.config import get_session
 from src.models.user import User
 from src.routes.auth_router import auth_router
@@ -29,5 +28,4 @@ def create_sample_user(user: User, session: Session = Depends(get_session)):
 
 
 app.include_router(auth_router)
-app.include_router(token_router)
 app.include_router(transaction_router)

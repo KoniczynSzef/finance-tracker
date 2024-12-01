@@ -11,6 +11,7 @@ from src.auth.schemas import Token
 from src.database.config import get_session
 from src.models.user import User
 from src.schemas.auth_schemas import TokenData
+from src.schemas.errors import ValidationError
 from src.schemas.user_schemas import UserCreate, UserRead
 
 credentials_exception = HTTPException(
@@ -18,6 +19,8 @@ credentials_exception = HTTPException(
     detail="Could not validate credentials",
     headers={"WWW-Authenticate": "Bearer"},
 )
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 class AuthService:
@@ -29,8 +32,6 @@ class AuthService:
     def __init__(self, session: Session = Depends(get_session), password_context: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")):
         self.session = session
         self.password_context = password_context
-        self.oauth2_scheme = Depends(
-            OAuth2PasswordBearer(tokenUrl="auth/token"))
 
     def register_user(self, user: UserCreate):
         existing_user = self.session.exec(select(User).where(
@@ -39,7 +40,10 @@ class AuthService:
         if existing_user:
             raise ValueError("User already exists.")
 
-        new_user = User(**user.model_dump())
+        try:
+            new_user = User(**user.model_dump())
+        except ValidationError as e:
+            raise ValidationError(e.args[0])
 
         new_user.hashed_password = self.hash_password(user.password)
 
@@ -50,13 +54,9 @@ class AuthService:
         return UserRead(**new_user.model_dump())
 
     def login_user(self, username: str, password: str) -> Token:
-        existing_user = self.session.exec(select(User).where(
-            User.username == username)).first()
+        existing_user = self.authenticate_user(username, password)
 
         if not existing_user:
-            raise credentials_exception
-
-        if not self.is_password_valid(password, existing_user.hashed_password):
             raise credentials_exception
 
         token = self.create_access_token(
@@ -86,7 +86,7 @@ class AuthService:
             to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_jwt
 
-    def get_current_user(self, token: str):
+    def get_current_user(self, token: str = Depends(oauth2_scheme)):
         try:
             payload = jwt.decode(token, self.SECRET_KEY,
                                  algorithms=[self.ALGORITHM])

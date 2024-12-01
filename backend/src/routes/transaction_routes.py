@@ -7,16 +7,23 @@ from src.schemas.transaction_schemas import (
     TransactionCreate,
     TransactionRead,
 )
+from src.services import auth_service
 from src.services.transaction_service import TransactionService
 
 transaction_router = APIRouter(prefix="/transactions", tags=["transactions"])
 
+auth_service = auth_service.AuthService()
 
-@ transaction_router.get("/", response_model=list[TransactionRead])
-def get_transactions(user_id: int, session: Session = Depends(get_session)):
+
+@transaction_router.get("/", response_model=list[TransactionRead])
+def get_transactions(session: Session = Depends(get_session), user: User = Depends(auth_service.get_current_user)):
+    if not user or not user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="User not found", headers={"WWW-Authenticate": "Bearer"})
+
     transaction_service = TransactionService(session)
 
-    return transaction_service.get_transactions_by_user_id(user_id=user_id)
+    return transaction_service.get_transactions_by_user_id(user_id=user.id)
 
 
 @transaction_router.get("/{transaction_id}", response_model=TransactionRead)
