@@ -20,14 +20,14 @@ credentials_exception = HTTPException(
     headers={"WWW-Authenticate": "Bearer"},
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
-
 
 class AuthService:
     SECRET_KEY = os.getenv("SECRET_KEY") or "not-so-secret"
     ALGORITHM = os.getenv("HASHING_ALGORITHM") or "not-so-secret"
     ACCESS_TOKEN_EXPIRE_IN_MINUTES = int(
         os.getenv("ACCESS_TOKEN_EXPIRE_IN_MINUTES") or 0)
+
+    oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
     def __init__(self, session: Session = Depends(get_session), password_context: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")):
         self.session = session
@@ -86,7 +86,7 @@ class AuthService:
             to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_jwt
 
-    def get_current_user(self, token: str = Depends(oauth2_scheme)):
+    def get_current_user(self, token: str = Depends(oauth2_bearer)):
         try:
             payload = jwt.decode(token, self.SECRET_KEY,
                                  algorithms=[self.ALGORITHM])

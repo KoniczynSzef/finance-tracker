@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
+from src.auth.actions.get_current_user import get_current_user
 from src.database.config import get_session
 from src.models.user import User
 from src.schemas.transaction_schemas import (
@@ -7,19 +8,21 @@ from src.schemas.transaction_schemas import (
     TransactionCreate,
     TransactionRead,
 )
-from src.services import auth_service
+from src.services.auth_service import AuthService
 from src.services.transaction_service import TransactionService
 
 transaction_router = APIRouter(prefix="/transactions", tags=["transactions"])
 
-auth_service = auth_service.AuthService()
+auth_service = AuthService()
 
 
 @transaction_router.get("/", response_model=list[TransactionRead])
-def get_transactions(session: Session = Depends(get_session), user: User = Depends(auth_service.get_current_user)):
+def get_transactions(session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     if not user or not user.id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="User not found", headers={"WWW-Authenticate": "Bearer"})
+
+    print(user)
 
     transaction_service = TransactionService(session)
 

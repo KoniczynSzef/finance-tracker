@@ -3,15 +3,15 @@ from os import getenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from models.user import User
 from sqlmodel import Session, select
 
 from src.database.config import get_session
+from src.models.user import User
 
 SECRET_KEY = getenv("SECRET_KEY")
 ALGORITHM = getenv("HASHING_ALGORITHM")
 
-oauth2_scheme = Depends(OAuth2PasswordBearer(tokenUrl="token"))
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
