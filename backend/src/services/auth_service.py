@@ -7,10 +7,9 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlmodel import Session, select
 
-from src.auth.schemas import Token
 from src.database.config import get_session
 from src.models.user import User
-from src.schemas.auth_schemas import TokenData
+from src.schemas.auth_schemas import Token, TokenData
 from src.schemas.errors import ValidationError
 from src.schemas.user_schemas import UserCreate, UserRead
 
@@ -20,14 +19,14 @@ credentials_exception = HTTPException(
     headers={"WWW-Authenticate": "Bearer"},
 )
 
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
+
 
 class AuthService:
     SECRET_KEY = os.getenv("SECRET_KEY") or "not-so-secret"
     ALGORITHM = os.getenv("HASHING_ALGORITHM") or "not-so-secret"
     ACCESS_TOKEN_EXPIRE_IN_MINUTES = int(
         os.getenv("ACCESS_TOKEN_EXPIRE_IN_MINUTES") or 0)
-
-    oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
     def __init__(self, session: Session = Depends(get_session), password_context: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")):
         self.session = session
@@ -86,14 +85,17 @@ class AuthService:
             to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_jwt
 
-    def get_current_user(self, token: str = Depends(oauth2_bearer)):
+    def get_current_user(self, token: str = Depends(oauth2_bearer), session: Session = Depends(get_session)):
+        if not self.SECRET_KEY or not self.ALGORITHM:
+            raise ValueError("SECRET_KEY and ALGORITHM must be set!")
+
         try:
             payload = jwt.decode(token, self.SECRET_KEY,
                                  algorithms=[self.ALGORITHM])
         except JWTError:
             raise credentials_exception
 
-        user = self.session.exec(select(User).where(
+        user = session.exec(select(User).where(
             User.username == payload["sub"])).first()
 
         if not user:
