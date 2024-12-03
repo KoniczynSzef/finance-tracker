@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 from src.database.config import get_session
 from src.models.user import User
@@ -16,7 +16,7 @@ transaction_router = APIRouter(prefix="/transactions", tags=["transactions"])
 auth_service = AuthService()
 
 
-@transaction_router.get("/", response_model=list[TransactionRead])
+@transaction_router.get("/", response_model=list[TransactionRead], status_code=status.HTTP_200_OK)
 def get_transactions(session: Session = Depends(get_session), user: User = Depends(auth_service.get_current_user)):
     if not user or not user.id:
         raise UNAUTHORIZED_ERROR
@@ -25,7 +25,7 @@ def get_transactions(session: Session = Depends(get_session), user: User = Depen
     return transaction_service.get_transactions_by_user_id(user_id=user.id)
 
 
-@transaction_router.get("/{transaction_id}", response_model=TransactionRead)
+@transaction_router.get("/{transaction_id}", response_model=TransactionRead, status_code=status.HTTP_200_OK)
 def get_transaction_by_id(transaction_id: int, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
     if not user or not user.id:
         raise UNAUTHORIZED_ERROR
@@ -38,7 +38,7 @@ def get_transaction_by_id(transaction_id: int, user: User = Depends(auth_service
         raise ACTION_ERROR(e.args[0])
 
 
-@ transaction_router.post("/", response_model=TransactionRead)
+@transaction_router.post("/", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)
 def create_transaction(transaction: TransactionCreate, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
     if not user or not user.id:
         raise UNAUTHORIZED_ERROR
@@ -56,7 +56,7 @@ def create_transaction(transaction: TransactionCreate, user: User = Depends(auth
         raise ACTION_ERROR(e.args[0])
 
 
-@transaction_router.put("/{transaction_id}", response_model=TransactionRead)
+@transaction_router.put("/{transaction_id}", response_model=TransactionRead, status_code=status.HTTP_200_OK)
 def update_transaction(transaction_id: int, transaction: TransactionBase, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
     if not user or not user.id:
         raise UNAUTHORIZED_ERROR
@@ -75,7 +75,7 @@ def update_transaction(transaction_id: int, transaction: TransactionBase, user: 
         raise ACTION_ERROR(e.args[0])
 
 
-@ transaction_router.delete("/{transaction_id}", response_model=TransactionRead)
+@transaction_router.delete("/{transaction_id}", response_model=TransactionRead, status_code=status.HTTP_200_OK)
 def delete_transaction(transaction_id: int, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
     if not user or not user.id:
         raise UNAUTHORIZED_ERROR
@@ -88,7 +88,7 @@ def delete_transaction(transaction_id: int, user: User = Depends(auth_service.ge
         raise ACTION_ERROR(e.args[0])
 
 
-@transaction_router.delete("/all/{user_id}")
+@transaction_router.delete("/all/{user_id}", response_model=str, status_code=status.HTTP_200_OK)
 def delete_all_transaction(user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
     if not user or not user.id:
         raise UNAUTHORIZED_ERROR
