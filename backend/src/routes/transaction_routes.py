@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from src.database.config import get_session
 from src.models.user import User
+from src.schemas.errors import ACTION_ERROR, UNAUTHORIZED_ERROR
 from src.schemas.transaction_schemas import (
     TransactionBase,
     TransactionCreate,
@@ -18,32 +19,28 @@ auth_service = AuthService()
 @transaction_router.get("/", response_model=list[TransactionRead])
 def get_transactions(session: Session = Depends(get_session), user: User = Depends(auth_service.get_current_user)):
     if not user or not user.id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="User not found", headers={"WWW-Authenticate": "Bearer"})
-
+        raise UNAUTHORIZED_ERROR
     transaction_service = TransactionService(session)
 
     return transaction_service.get_transactions_by_user_id(user_id=user.id)
 
 
 @transaction_router.get("/{transaction_id}", response_model=TransactionRead)
-def get_transaction_by_id(user_id: int, transaction_id: int, session: Session = Depends(get_session)):
+def get_transaction_by_id(transaction_id: int, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
     transaction_service = TransactionService(session)
 
+    if not user or not user.id:
+        raise UNAUTHORIZED_ERROR
     try:
-        return transaction_service.get_transaction_by_id(user_id=user_id, transaction_id=transaction_id)
+        return transaction_service.get_transaction_by_id(user_id=user.id, transaction_id=transaction_id)
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=e.args[0], headers={"WWW-Authenticate": "Bearer"})
+        raise ACTION_ERROR(e.args[0])
 
 
 @ transaction_router.post("/", response_model=TransactionRead)
-def create_transaction(user_id: int, transaction: TransactionCreate, session: Session = Depends(get_session)):
-    user = session.exec(select(User).where(User.id == user_id)).first()
-
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="User not found", headers={"WWW-Authenticate": "Bearer"})
+def create_transaction(transaction: TransactionCreate, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
+    if not user or not user.id:
+        raise UNAUTHORIZED_ERROR
 
     transaction_service = TransactionService(session)
 
@@ -55,8 +52,7 @@ def create_transaction(user_id: int, transaction: TransactionCreate, session: Se
             user, created_transaction.is_income, created_transaction.amount)
         return created_transaction
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=e.args[0], headers={"WWW-Authenticate": "Bearer"})
+        raise ACTION_ERROR(e.args[0])
 
 
 @transaction_router.put("/{transaction_id}", response_model=TransactionRead)

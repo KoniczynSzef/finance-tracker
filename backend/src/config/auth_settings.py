@@ -15,5 +15,3 @@ settings = Settings(
     ACCESS_TOKEN_EXPIRE_IN_MINUTES=int(
         getenv("ACCESS_TOKEN_EXPIRE_IN_MINUTES") or 0),
 )
-
-print(settings)
