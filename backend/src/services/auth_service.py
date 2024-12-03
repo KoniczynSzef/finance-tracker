@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 
 from fastapi import Depends, HTTPException, status
@@ -96,6 +97,12 @@ class AuthService:
         return user
 
     def is_password_valid(self, plain_password: str, hashed_password: str):
+        regex = re.compile(
+            r'^(?=\S{6,20}$)(?=.*?\d)(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[^A-Za-z\s0-9])')
+
+        if not regex.match(plain_password):
+            return False
+
         return self.password_context.verify(plain_password, hashed_password)
 
     def hash_password(self, password: str):
