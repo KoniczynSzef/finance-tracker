@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session, select
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
 from src.database.config import get_session
 from src.models.user import User
 from src.schemas.errors import ACTION_ERROR, UNAUTHORIZED_ERROR
@@ -27,10 +27,11 @@ def get_transactions(session: Session = Depends(get_session), user: User = Depen
 
 @transaction_router.get("/{transaction_id}", response_model=TransactionRead)
 def get_transaction_by_id(transaction_id: int, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
-    transaction_service = TransactionService(session)
-
     if not user or not user.id:
         raise UNAUTHORIZED_ERROR
+
+    transaction_service = TransactionService(session)
+
     try:
         return transaction_service.get_transaction_by_id(user_id=user.id, transaction_id=transaction_id)
     except Exception as e:
@@ -56,39 +57,42 @@ def create_transaction(transaction: TransactionCreate, user: User = Depends(auth
 
 
 @transaction_router.put("/{transaction_id}", response_model=TransactionRead)
-def update_transaction(user_id: int, transaction_id: int, transaction: TransactionBase, session: Session = Depends(get_session)):
-    transaction_service = TransactionService(session)
+def update_transaction(transaction_id: int, transaction: TransactionBase, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
+    if not user or not user.id:
+        raise UNAUTHORIZED_ERROR
 
-    user = session.exec(select(User).where(User.id == user_id)).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="User not found", headers={"WWW-Authenticate": "Bearer"})
+    transaction_service = TransactionService(session)
 
     try:
         updated_transaction = transaction_service.update_transaction_by_id(
-            transaction_id=transaction_id, user_id=user_id, transaction=transaction)
+            transaction_id=transaction_id, user_id=user.id, transaction=transaction)
 
         transaction_service.update_user_balance(
             user=user, is_income=updated_transaction.is_income, amount=updated_transaction.amount)
 
         return updated_transaction
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=e.args[0], headers={"WWW-Authenticate": "Bearer"})
+        raise ACTION_ERROR(e.args[0])
 
 
 @ transaction_router.delete("/{transaction_id}", response_model=TransactionRead)
-def delete_transaction(user_id: int, transaction_id: int, session: Session = Depends(get_session)):
+def delete_transaction(transaction_id: int, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
+    if not user or not user.id:
+        raise UNAUTHORIZED_ERROR
+
     transaction_service = TransactionService(session)
 
     try:
-        return transaction_service.delete_transaction_by_id(user_id=user_id, transaction_id=transaction_id)
+        return transaction_service.delete_transaction_by_id(user_id=user.id, transaction_id=transaction_id)
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=e.args[0], headers={"WWW-Authenticate": "Bearer"})
+        raise ACTION_ERROR(e.args[0])
 
 
-@ transaction_router.delete("/all/{user_id}")
-def delete_all_transaction(user_id: int,  session: Session = Depends(get_session)):
+@transaction_router.delete("/all/{user_id}")
+def delete_all_transaction(user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
+    if not user or not user.id:
+        raise UNAUTHORIZED_ERROR
+
     transaction_service = TransactionService(session)
-    return transaction_service.delete_all_transactions_by_user_id(user_id=user_id)
+
+    return transaction_service.delete_all_transactions_by_user_id(user_id=user.id)
