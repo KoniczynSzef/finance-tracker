@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta
 
 from fastapi import Depends, HTTPException, status
@@ -7,6 +6,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlmodel import Session, select
 
+from src.config.auth_settings import settings
 from src.database.config import get_session
 from src.models.user import User
 from src.schemas.auth_schemas import Token, TokenData
@@ -23,11 +23,6 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 class AuthService:
-    SECRET_KEY = os.getenv("SECRET_KEY") or "not-so-secret"
-    ALGORITHM = os.getenv("HASHING_ALGORITHM") or "not-so-secret"
-    ACCESS_TOKEN_EXPIRE_IN_MINUTES = int(
-        os.getenv("ACCESS_TOKEN_EXPIRE_IN_MINUTES") or 0)
-
     def __init__(self, session: Session = Depends(get_session), password_context: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")):
         self.session = session
         self.password_context = password_context
@@ -75,23 +70,20 @@ class AuthService:
 
         return user
 
-    def create_access_token(self, token_data: TokenData, expires_delta: timedelta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_IN_MINUTES)):
+    def create_access_token(self, token_data: TokenData, expires_delta: timedelta = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_IN_MINUTES)):
         to_encode = token_data.model_dump()
         expire = datetime.now() + expires_delta
 
         to_encode.update({"exp": expire})
 
         encoded_jwt = jwt.encode(
-            to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+            to_encode, settings.SECRET_KEY, settings.HASHING_ALGORITHM)
         return encoded_jwt
 
     def get_current_user(self, token: str = Depends(oauth2_bearer), session: Session = Depends(get_session)):
-        if not self.SECRET_KEY or not self.ALGORITHM:
-            raise ValueError("SECRET_KEY and ALGORITHM must be set!")
-
         try:
-            payload = jwt.decode(token, self.SECRET_KEY,
-                                 algorithms=[self.ALGORITHM])
+            payload = jwt.decode(token, settings.SECRET_KEY,
+                                 algorithms=[settings.HASHING_ALGORITHM])
         except JWTError:
             raise credentials_exception
 
