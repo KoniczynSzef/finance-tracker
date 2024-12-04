@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 from src.database.config import get_session
 from src.models.user import User
 from src.routes.auth_router import auth_router
-from src.routes.transaction_routes import transaction_router
+from src.routes.transaction_router import transaction_router
 
 app = FastAPI()
 
