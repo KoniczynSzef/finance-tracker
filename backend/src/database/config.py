@@ -1,3 +1,4 @@
+import os
 from os import getenv
 
 from dotenv import load_dotenv
@@ -14,6 +15,10 @@ engine = create_engine(DATABASE_URL, echo=True)
 
 
 def get_session():
+    if os.getenv("BACKEND_ENVIRONMENT") == "TEST":
+        from tests.api_setup import mock_session
+        return mock_session()
+
     session = Session(engine)
 
     try:
