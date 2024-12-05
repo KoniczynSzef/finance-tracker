@@ -1,6 +1,8 @@
 from database.config import get_session
 from fastapi.testclient import TestClient
 from main import app
+from schemas.auth_schemas import TokenData
+from services.auth_service import AuthService
 from sqlalchemy import StaticPool, create_engine
 from sqlmodel import Session, SQLModel
 
@@ -31,3 +33,16 @@ def mock_database_create():
 
 def mock_database_drop():
     SQLModel.metadata.drop_all(mock_engine)
+
+
+def unauthenticated_client():
+    return TestClient(app)
+
+
+def authenticated_client(client: TestClient):
+    auth_service = AuthService()
+
+    token = auth_service.create_access_token(TokenData(sub="test", exp=100))
+    client.headers.update({"Authorization": f"Bearer {token}"})
+
+    return client
