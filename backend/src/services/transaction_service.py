@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 
 from fastapi import Depends
 
@@ -15,17 +16,18 @@ from src.schemas.transaction_schemas import (  # type: ignore # noqa: F401
     TransactionCreate,
     TransactionRead,
 )
+from src.utils.filter_transactions import filter_transactions
 
 
 class TransactionService:
     def __init__(self, session: Session = Depends(get_session)):
         self.session = session
 
-    def get_transactions_by_user_id(self, user_id: int):
+    def get_transactions_by_user_id(self, user_id: int, name: Optional[str] = None, category: Optional[str] = None, min_date: Optional[datetime] = None, max_date: Optional[datetime] = None, min_amount: Optional[Decimal] = None, max_amount: Optional[Decimal] = None):
         transactions = self.session.exec(
             select(Transaction).where(Transaction.user_id == user_id)).all()
 
-        return [TransactionRead(**transaction.model_dump()) for transaction in transactions]
+        return filter_transactions([TransactionRead(**transaction.model_dump()) for transaction in transactions], name=name, category=category, min_date=min_date, max_date=max_date, min_amount=min_amount, max_amount=max_amount)
 
     def get_transaction_by_id(self, transaction_id: int, user_id: int):
         transaction = self.session.exec(select(Transaction).where(

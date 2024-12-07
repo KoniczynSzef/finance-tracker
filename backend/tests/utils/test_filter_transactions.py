@@ -23,6 +23,15 @@ def get_mock_transactions():
     ]
 
 
+def test_filter_without_filters():
+    transactions = get_mock_transactions()
+    filtered = filter_transactions(transactions)
+
+    assert len(filtered) == 4
+    assert all(t.name in [
+               "Groceries", "Rent", "Utilities", "Entertainment"] for t in filtered)
+
+
 def test_filter_by_name():
     transactions = get_mock_transactions()
     filtered = filter_transactions(transactions, name="Groceries")

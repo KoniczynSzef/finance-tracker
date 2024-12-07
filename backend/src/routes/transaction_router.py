@@ -1,4 +1,8 @@
-from fastapi import APIRouter, Depends, status
+from datetime import datetime
+from decimal import Decimal
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query, status
 from sqlmodel import Session
 from src.database.config import get_session
 from src.models.user import User
@@ -23,16 +27,11 @@ auth_service = AuthService()
 
 
 @transaction_router.get("/", response_model=list[TransactionRead], status_code=status.HTTP_200_OK)
-def get_transactions(session: Session = Depends(get_session), user: User = Depends(auth_service.get_current_user)):
+def get_transactions(session: Session = Depends(get_session), user: User = Depends(auth_service.get_current_user), name: Optional[str] = Query(None), category: Optional[str] = Query(None), min_date: Optional[datetime] = Query(None), max_date: Optional[datetime] = Query(None), min_amount: Optional[Decimal] = Query(None), max_amount: Optional[Decimal] = Query(None)):
     validated_user_id = validate_current_user(user)
     transaction_service = TransactionService(session)
 
-    return transaction_service.get_transactions_by_user_id(validated_user_id)
-
-
-@transaction_router.get("/", response_model=list[TransactionRead], status_code=status.HTTP_200_OK)
-def get_transactions_in_date_range(start_date: str, end_date: str, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
-    return 0
+    return transaction_service.get_transactions_by_user_id(validated_user_id, name=name)
 
 
 @transaction_router.post("/", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)
