@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 from src.database.config import get_session
 from src.models.user import User
-from src.schemas.errors import ACTION_ERROR
+from src.schemas.errors import ACTION_ERROR, InvalidCredentials, NotFound
 from src.schemas.transaction_schemas import (
     TransactionBase,
     TransactionCreate,
@@ -32,8 +32,10 @@ def get_transaction_by_id(transaction_id: int, user: User = Depends(auth_service
 
     try:
         return transaction_service.get_transaction_by_id(user_id=validated_user_id, transaction_id=transaction_id)
-    except Exception as e:
-        raise ACTION_ERROR(e.args[0])
+    except NotFound as e:
+        raise ACTION_ERROR(e.args[0], status_code=status.HTTP_404_NOT_FOUND)
+    except InvalidCredentials as e:
+        raise ACTION_ERROR(e.args[0], status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 @transaction_router.post("/", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)

@@ -32,8 +32,8 @@ UNAUTHORIZED_ERROR = HTTPException(
 )
 
 
-def ACTION_ERROR(message: str): return HTTPException(
-    status_code=status.HTTP_400_BAD_REQUEST,
+def ACTION_ERROR(message: str, status_code: int = status.HTTP_400_BAD_REQUEST): return HTTPException(
+    status_code=status_code,
     detail=message,
     headers={"WWW-Authenticate": "Bearer"},
 )
