@@ -41,18 +41,6 @@ class TransactionService:
 
         return transaction
 
-    def get_transactions_by_category(self, user_id: int, category: str):
-        transactions = self.session.exec(
-            select(Transaction).where(Transaction.user_id == user_id, Transaction.category == category)).all()
-
-        return [TransactionRead(**transaction.model_dump()) for transaction in transactions]
-
-    def get_transactions_in_date_range(self, user_id: int, start_date: datetime, end_date: datetime):
-        transactions = self.session.exec(select(Transaction).where(
-            Transaction.user_id == user_id, Transaction.date >= start_date, Transaction.date <= end_date)).all()
-
-        return [TransactionRead(**transaction.model_dump()) for transaction in transactions]
-
     def add_transaction(self, user: User, transaction: TransactionCreate):
         if not user.id:
             raise InvalidCredentials(
