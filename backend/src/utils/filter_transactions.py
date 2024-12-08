@@ -10,11 +10,11 @@ def filter_transactions(transactions: list[TransactionRead], name: Optional[str]
 
     if name:
         filtered_transactions = [
-            transaction for transaction in transactions if transaction.name == name]
+            transaction for transaction in transactions if str.lower(transaction.name).startswith(name.lower())]
 
     if category:
         filtered_transactions = [
-            transaction for transaction in filtered_transactions if transaction.category == category]
+            transaction for transaction in filtered_transactions if str.lower(transaction.category).startswith(category.lower())]
 
     if min_date and max_date and min_date <= max_date:
         filtered_transactions = [

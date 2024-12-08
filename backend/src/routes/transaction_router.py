@@ -34,6 +34,19 @@ def get_transactions(session: Session = Depends(get_session), user: User = Depen
     return transaction_service.get_transactions_by_user_id(validated_user_id, name=name)
 
 
+@transaction_router.get("/{transaction_id}", response_model=TransactionRead, status_code=status.HTTP_200_OK)
+def get_transaction_by_id(transaction_id: int, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
+    validated_user_id = validate_current_user(user)
+    transaction_service = TransactionService(session)
+
+    try:
+        return transaction_service.get_transaction_by_id(user_id=validated_user_id, transaction_id=transaction_id)
+    except NotFound as e:
+        raise ACTION_ERROR(e.args[0], status_code=status.HTTP_404_NOT_FOUND)
+    except InvalidCredentials as e:
+        raise ACTION_ERROR(e.args[0], status_code=status.HTTP_401_UNAUTHORIZED)
+
+
 @transaction_router.post("/", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)
 def create_transaction(transaction: TransactionCreate, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
     validate_current_user(user)
