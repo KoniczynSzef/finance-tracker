@@ -3,7 +3,9 @@ from os import getenv
 
 import pytest
 from database.config import get_session
+from schemas.auth_schemas import TokenData
 from schemas.transaction_schemas import TransactionCreate
+from services.auth_service import AuthService
 from src.models.user import User
 from tests.api_setup import (
     client,
@@ -29,7 +31,6 @@ def setup():
 
 
 def test_post_transaction_endpoint_when_not_authenticated():
-    # Assuming /transaction is the endpoint for posting
     payload = TransactionCreate(name="New Transaction", amount=Decimal(
         100), category="Test Category", user_id=1)
 
@@ -38,6 +39,24 @@ def test_post_transaction_endpoint_when_not_authenticated():
 
     # Endpoint should return 401 if not authenticated
     assert response.status_code == 401
+
+
+def test_post_transaction_endpoint_when_authenticated():
+    auth_service = AuthService(session)
+
+    payload = TransactionCreate(name="New Transaction", amount=Decimal(
+        100), category="Test Category", user_id=1)
+
+    token = auth_service.create_access_token(
+        TokenData(sub="Username Test", exp=60))
+    auth_header = {"Authorization": f"Bearer {token}"}
+
+    response = client.post(
+        "/transactions", headers=auth_header, json=payload.model_dump_json())
+
+    assert not response.text
+
+    assert response.status_code == 201
 
 # TODO: WRITE TESTS FOR POST TRANSACTION ENDPOINT
 

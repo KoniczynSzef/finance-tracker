@@ -54,7 +54,7 @@ def create_transaction(transaction: TransactionCreate, user: User = Depends(auth
 
     try:
         created_transaction = transaction_service.add_transaction(
-            user, transaction=transaction)
+            user, transaction)
 
         transaction_service.update_user_balance(
             user, created_transaction.is_income, created_transaction.amount)
