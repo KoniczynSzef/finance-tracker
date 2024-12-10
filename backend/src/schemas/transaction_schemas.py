@@ -42,3 +42,13 @@ class TransactionRead(TransactionBase):
 
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
+
+
+class TransactionsSummary(BaseModel):
+    total_income: Decimal = Field(default=Decimal(0))
+    total_expense: Decimal = Field(default=Decimal(0))
+    total_transactions: int = Field(default=0)
+
+    average_transaction_amount: Decimal = Field(default=Decimal(0))
+    highest_transaction_amount: Decimal = Field(default=Decimal(0))
+    lowest_transaction_amount: Decimal = Field(default=Decimal(0))

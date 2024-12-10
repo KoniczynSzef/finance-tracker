@@ -16,6 +16,7 @@ from src.schemas.transaction_schemas import (
     TransactionBase,
     TransactionCreate,
     TransactionRead,
+    TransactionsSummary,
 )
 from src.services.auth_service import AuthService
 from src.services.transaction_service import TransactionService
@@ -32,6 +33,14 @@ def get_transactions(session: Session = Depends(get_session), user: User = Depen
     transaction_service = TransactionService(session)
 
     return transaction_service.get_transactions_by_user_id(validated_user_id, name=name)
+
+
+@transaction_router.get("/transactions-summary", response_model=TransactionsSummary, status_code=status.HTTP_200_OK)
+def get_transactions_summary(session: Session = Depends(get_session), user: User = Depends(auth_service.get_current_user)):
+    validated_user_id = validate_current_user(user)
+    transaction_service = TransactionService(session)
+
+    return transaction_service.get_transactions_summary(validated_user_id)
 
 
 @transaction_router.get("/{transaction_id}", response_model=TransactionRead, status_code=status.HTTP_200_OK)

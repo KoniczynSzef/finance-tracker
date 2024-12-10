@@ -17,6 +17,7 @@ from src.schemas.transaction_schemas import (  # type: ignore # noqa: F401
     TransactionRead,
 )
 from src.utils.filter_transactions import filter_transactions
+from src.utils.summarize_transactions import summarize_transactions
 
 
 class TransactionService:
@@ -42,6 +43,11 @@ class TransactionService:
                 "Invalid transaction: User does not own the transaction.")
 
         return transaction
+
+    def get_transactions_summary(self, user_id: int):
+        transactions = self.get_transactions_by_user_id(user_id)
+
+        return summarize_transactions(transactions)
 
     def add_transaction(self, user: User, transaction: TransactionCreate):
         if not user.id:
@@ -91,8 +97,8 @@ class TransactionService:
         return user
 
     def update_transaction_by_id(self, transaction_id: int, user_id: int, transaction: TransactionBase):
-        existing_transaction = self.session.exec(select(Transaction).where(
-            Transaction.id == transaction_id)).first()
+        existing_transaction = self.session.exec(
+            select(Transaction).where(Transaction.id == transaction_id)).first()
 
         if not existing_transaction:
             raise NotFound(
