@@ -84,8 +84,18 @@ def test_post_transaction_endpoint_properly_updates_database():
     transaction = session.exec(select(Transaction).where(
         Transaction.name == data["name"])).first()
 
+    user = session.exec(select(User).where(
+        User.id == data["user_id"])).first()
+
+    session.refresh(user)
+
     # Transaction should be created
     assert transaction is not None
     assert transaction.name == "New Transaction"
     assert transaction.amount == Decimal(100)
     assert transaction.category == "Test Category"
+
+    # User should be updated
+    assert user is not None
+    assert len(user.transactions) == 1
+    assert user.current_balance == Decimal(-100)
