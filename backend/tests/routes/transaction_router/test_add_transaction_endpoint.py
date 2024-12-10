@@ -1,17 +1,21 @@
 from decimal import Decimal
 from os import getenv
+from typing import Any
 
 import pytest
 from database.config import get_session
 from schemas.auth_schemas import TokenData
 from schemas.transaction_schemas import TransactionCreate
 from services.auth_service import AuthService
+from sqlmodel import select
+from src.models.transaction import Transaction
 from src.models.user import User
 from tests.api_setup import (
     client,
     mock_database_create,
     mock_database_drop,
 )
+from tests.serialize_payload import serialize_payload
 
 session = get_session()
 
@@ -47,18 +51,41 @@ def test_post_transaction_endpoint_when_authenticated():
     payload = TransactionCreate(name="New Transaction", amount=Decimal(
         100), category="Test Category", user_id=1)
 
+    payload_dict = serialize_payload(payload.model_dump())
+
     token = auth_service.create_access_token(
         TokenData(sub="Username Test", exp=60))
     auth_header = {"Authorization": f"Bearer {token}"}
 
     response = client.post(
-        "/transactions", headers=auth_header, json=payload.model_dump_json())
+        "/transactions", headers=auth_header, json=payload_dict)
 
-    assert not response.text
-
+    # Endpoint should return 201 if authenticated
     assert response.status_code == 201
 
-# TODO: WRITE TESTS FOR POST TRANSACTION ENDPOINT
 
-# * WHEN AUTHENTICATED AND VALID PAYLOAD
-# * WHEN AUTHENTICATED AND INVALID PAYLOAD
+def test_post_transaction_endpoint_properly_updates_database():
+    auth_service = AuthService(session)
+
+    payload = TransactionCreate(name="New Transaction", amount=Decimal(
+        100), category="Test Category", user_id=1)
+
+    payload_dict = serialize_payload(payload.model_dump())
+
+    token = auth_service.create_access_token(
+        TokenData(sub="Username Test", exp=60))
+    auth_header = {"Authorization": f"Bearer {token}"}
+
+    response = client.post(
+        "/transactions", headers=auth_header, json=payload_dict)
+
+    data: dict[str, Any] = response.json()
+
+    transaction = session.exec(select(Transaction).where(
+        Transaction.name == data["name"])).first()
+
+    # Transaction should be created
+    assert transaction is not None
+    assert transaction.name == "New Transaction"
+    assert transaction.amount == Decimal(100)
+    assert transaction.category == "Test Category"
