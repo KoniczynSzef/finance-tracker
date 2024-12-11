@@ -52,3 +52,4 @@ class TransactionsSummary(BaseModel):
     average_transaction_amount: Decimal = Field(default=Decimal(0))
     highest_transaction_amount: Decimal = Field(default=Decimal(0))
     lowest_transaction_amount: Decimal = Field(default=Decimal(0))
+    most_common_category: str = Field(default="")
