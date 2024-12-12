@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -10,4 +11,5 @@ import { ButtonModule } from 'primeng/button';
 })
 export class AppComponent {
   title = 'frontend';
+  constructor(private authService: AuthService) {}
 }
