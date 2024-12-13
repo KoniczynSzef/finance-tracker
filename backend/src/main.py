@@ -1,30 +1,25 @@
-from fastapi import Depends, FastAPI
-from sqlmodel import Session, select
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from src.database.config import get_session
-from src.models.user import User
 from src.routes.auth_router import auth_router
 from src.routes.transaction_router import transaction_router
 
 app = FastAPI()
 
+origins = ["http://localhost:4200"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 def health_check():
     return {"status": "ok"}
-
-
-@app.get("/all-users")
-def get_all_users(session: Session = Depends(get_session)):
-    return session.exec(select(User)).all()
-
-
-@app.post("/create-sample-user")
-def create_sample_user(user: User, session: Session = Depends(get_session)):
-    session.add(user)
-    session.commit()
-
-    return {"created_user": user.username}
 
 
 app.include_router(auth_router)
