@@ -1,6 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
-import { catchError, of } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
@@ -10,24 +9,16 @@ import { AuthService } from '../auth/auth.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'frontend';
-  isLoggedIn = false;
   constructor(private authService: AuthService) {}
 
-  handleClick() {
-    this.authService
-      .getUser()
-      .pipe(
-        catchError((err) => {
-          console.log(err);
-          return of(null);
-        })
-      )
-      .subscribe((data) => {
-        if (data) {
-          this.isLoggedIn = true;
-        }
-      });
+  ngOnInit() {
+    const token = window.localStorage.getItem('jwt-token');
+    console.log(token);
+
+    if (!token) {
+      alert('You are not logged in!');
+    }
   }
 }
