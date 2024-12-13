@@ -8,4 +8,8 @@ import { environment } from '../environments/environment.development';
 export class AuthService {
   API_URL = environment.apiUrl;
   constructor(private httpClient: HttpClient) {}
+
+  getUser() {
+    return this.httpClient.get<any>(`${this.API_URL}/auth/me`);
+  }
 }

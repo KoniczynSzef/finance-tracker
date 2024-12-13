@@ -14,6 +14,8 @@ export class AppComponent {
   constructor(private authService: AuthService) {}
 
   handleClick() {
-    console.log(this.authService.API_URL);
+    this.authService.getUser().subscribe((user) => {
+      console.log(user);
+    });
   }
 }
