@@ -12,4 +12,8 @@ import { AuthService } from '../auth/auth.service';
 export class AppComponent {
   title = 'frontend';
   constructor(private authService: AuthService) {}
+
+  handleClick() {
+    console.log(this.authService.API_URL);
+  }
 }
