@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
+import { catchError, of } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
@@ -11,11 +12,22 @@ import { AuthService } from '../auth/auth.service';
 })
 export class AppComponent {
   title = 'frontend';
+  isLoggedIn = false;
   constructor(private authService: AuthService) {}
 
   handleClick() {
-    this.authService.getUser().subscribe((user) => {
-      console.log(user);
-    });
+    this.authService
+      .getUser()
+      .pipe(
+        catchError((err) => {
+          console.log(err);
+          return of(null);
+        })
+      )
+      .subscribe((data) => {
+        if (data) {
+          this.isLoggedIn = true;
+        }
+      });
   }
 }

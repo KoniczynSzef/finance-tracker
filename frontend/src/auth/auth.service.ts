@@ -10,6 +10,8 @@ export class AuthService {
   constructor(private httpClient: HttpClient) {}
 
   getUser() {
-    return this.httpClient.get<any>(`${this.API_URL}/auth/me`);
+    const token = window.localStorage.getItem('jwt-token');
+
+    return this.httpClient.get<any>(`${this.API_URL}/auth/me?token=${token}`);
   }
 }
