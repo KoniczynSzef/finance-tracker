@@ -32,7 +32,7 @@ def get_transactions(session: Session = Depends(get_session), user: User = Depen
     validated_user_id = validate_current_user(user)
     transaction_service = TransactionService(session)
 
-    return transaction_service.get_transactions_by_user_id(validated_user_id, name=name)
+    return transaction_service.get_transactions_by_user_id(validated_user_id, name=name, category=category, min_date=min_date, max_date=max_date, min_amount=min_amount, max_amount=max_amount)
 
 
 @transaction_router.get("/transactions-summary", response_model=TransactionsSummary, status_code=status.HTTP_200_OK)
