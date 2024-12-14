@@ -1,6 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment.development';
+import { ResponseError } from '../types/auth/response-error.type';
+import { Token } from '../types/auth/token.type';
 
 @Injectable({
   providedIn: 'root',
@@ -25,8 +27,12 @@ export class AuthService {
     formData.append('username', username);
     formData.append('password', password);
 
-    return this.httpClient.post<any>(`${this.API_URL}/auth/token`, formData, {
-      headers: new HttpHeaders({ Accept: 'application/json' }),
-    });
+    return this.httpClient.post<Token | ResponseError>(
+      `${this.API_URL}/auth/token`,
+      formData,
+      {
+        headers: new HttpHeaders({ Accept: 'application/json' }),
+      }
+    );
   }
 }
