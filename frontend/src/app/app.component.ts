@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../auth/auth.service';
+import { ResponseError } from '../types/auth/response-error.type';
 
 @Component({
   selector: 'app-root',
@@ -14,8 +15,18 @@ export class AppComponent implements OnInit {
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.authService.getUser().subscribe((res) => {
-      console.log(res);
+    this.authService.getUser().subscribe({
+      next: (res) => {
+        if ('error' in res) {
+          return;
+        }
+
+        console.log(`res: ${res.username}`);
+        console.log(`res: ${res.email}`);
+      },
+      error: (errorResponse: ResponseError) => {
+        console.log('Error Detail: ', errorResponse.error.detail);
+      },
     });
   }
 

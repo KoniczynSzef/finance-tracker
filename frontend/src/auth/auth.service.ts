@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment.development';
 import { ResponseError } from '../types/auth/response-error.type';
 import { Token } from '../types/auth/token.type';
+import { UserRead } from '../types/schemas/user-schemas.type';
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +19,9 @@ export class AuthService {
   getUser() {
     const token = window.localStorage.getItem('jwt-token');
 
-    return this.httpClient.get<any>(`${this.API_URL}/auth/me?token=${token}`);
+    return this.httpClient.get<UserRead | ResponseError>(
+      `${this.API_URL}/auth/me?token=${token}`
+    );
   }
 
   login(username: string, password: string) {
