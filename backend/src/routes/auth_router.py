@@ -4,10 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 from src.database.config import get_session
-from src.models.user import User
 from src.schemas.user_schemas import UserCreate, UserRead
 from src.services.auth_service import AuthService, credentials_exception
-from src.utils.validate_current_user import validate_current_user
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -15,8 +13,7 @@ auth_service = AuthService()
 
 
 @auth_router.get("/me")
-def get_current_user(token: str, user: User = Depends(auth_service.get_current_user), session: Session = Depends(get_session)):
-    validate_current_user(user)
+def get_current_user(token: str, session: Session = Depends(get_session)):
     return auth_service.get_current_user(token, session)
 
 

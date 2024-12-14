@@ -35,4 +35,8 @@ export class AuthService {
       }
     );
   }
+
+  saveTokenInLocalStorage(token: Token) {
+    window.localStorage.setItem('jwt-token', token.access_token);
+  }
 }

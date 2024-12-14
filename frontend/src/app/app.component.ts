@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../auth/auth.service';
 
@@ -9,9 +9,15 @@ import { AuthService } from '../auth/auth.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'frontend';
   constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    this.authService.getUser().subscribe((res) => {
+      console.log(res);
+    });
+  }
 
   handleClick() {
     const username = window.prompt('Enter your username');
@@ -22,7 +28,14 @@ export class AppComponent {
     }
 
     this.authService.login(username, password).subscribe((res) => {
-      console.log(res);
+      if ('access_token' in res) {
+        console.log(res);
+        this.authService.saveTokenInLocalStorage(res);
+
+        this.authService.getUser().subscribe((res) => {
+          console.log(res);
+        });
+      }
     });
   }
 }

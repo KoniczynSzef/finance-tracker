@@ -85,6 +85,9 @@ class AuthService:
         try:
             payload = jwt.decode(token, settings.SECRET_KEY,
                                  algorithms=[settings.HASHING_ALGORITHM])
+
+            print("payload", payload)
+
         except JWTError:
             raise credentials_exception
 
