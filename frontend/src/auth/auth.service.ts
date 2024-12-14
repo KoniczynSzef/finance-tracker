@@ -29,13 +29,9 @@ export class AuthService {
     formData.append('username', username);
     formData.append('password', password);
 
-    return this.httpClient.post<Token | ResponseError>(
-      `${this.API_URL}/auth/token`,
-      formData,
-      {
-        headers: new HttpHeaders({ Accept: 'application/json' }),
-      }
-    );
+    return this.httpClient.post<Token>(`${this.API_URL}/auth/token`, formData, {
+      headers: new HttpHeaders({ Accept: 'application/json' }),
+    });
   }
 
   saveTokenInLocalStorage(token: Token) {

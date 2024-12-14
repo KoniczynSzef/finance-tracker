@@ -24,7 +24,7 @@
   <button
     pButton
     type="submit"
-    label="Sign in"
     class="w-full text-white"
+    [label]="loginFormGroup.status !== 'PENDING' ? 'Sign in' : ''"
   ></button>
 </form>
