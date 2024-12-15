@@ -25,6 +25,9 @@
     pButton
     type="submit"
     class="w-full text-white"
-    [label]="loginFormGroup.status !== 'PENDING' ? 'Sign in' : ''"
+    [label]="isSubmitting ? 'Loading...' : 'Sign in'"
+    [disabled]="isSubmitting || loginFormGroup.invalid"
   ></button>
 </form>
+
+<p-toast />

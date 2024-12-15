@@ -1,9 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
+import { Toast } from 'primeng/toast';
 import { catchError, of } from 'rxjs';
 import { AuthService } from '../../../../../auth/auth.service';
 import { ResponseError } from '../../../../../types/auth/response-error.type';
@@ -11,14 +18,34 @@ import { ResponseError } from '../../../../../types/auth/response-error.type';
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [ReactiveFormsModule, InputTextModule, PasswordModule, ButtonModule],
+  imports: [
+    ReactiveFormsModule,
+    InputTextModule,
+    PasswordModule,
+    ButtonModule,
+    Toast,
+  ],
+  providers: [MessageService],
   templateUrl: './login-form.component.html',
   styleUrl: './login-form.component.scss',
 })
 export class LoginFormComponent implements OnInit {
-  constructor(private authService: AuthService, private router: Router) {}
+  isSubmitting = false;
+  loginFormGroup: FormGroup;
 
-  ngOnInit(): void {
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private messageService: MessageService,
+    private formBuilder: FormBuilder
+  ) {
+    this.loginFormGroup = this.formBuilder.group({
+      username: ['', Validators.required],
+      password: ['', Validators.required],
+    });
+  }
+
+  ngOnInit() {
     this.authService
       .getCurrentUser()
       .pipe(catchError(() => of()))
@@ -28,29 +55,50 @@ export class LoginFormComponent implements OnInit {
       });
   }
 
-  loginFormGroup = new FormGroup({
-    username: new FormControl<string>(''),
-    password: new FormControl<string>(''),
-  });
-
   // TODO: Add validation
 
   onSubmit() {
+    this.isSubmitting = true;
     const username = this.loginFormGroup.value.username;
     const password = this.loginFormGroup.value.password;
 
-    if (!username || !password) {
+    if (this.loginFormGroup.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please fill in all fields!',
+        life: 3000,
+      });
+
       return;
     }
 
     this.authService.login(username, password).subscribe({
       next: (res) => {
         this.authService.saveTokenInLocalStorage(res);
-        this.router.navigate(['/']);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'You are now logged in!',
+          life: 3000,
+        });
+
+        setTimeout(() => {
+          this.router.navigate(['/']);
+        }, 300);
       },
       error: (err: ResponseError) => {
-        alert(err.error.detail);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err.error.detail,
+          life: 3000,
+        });
       },
     });
+
+    setTimeout(() => {
+      this.isSubmitting = false;
+    }, 300);
   }
 }
