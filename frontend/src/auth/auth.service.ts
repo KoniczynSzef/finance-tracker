@@ -22,6 +22,11 @@ export class AuthService {
     );
   }
 
+  isAuthenticated() {
+    const token = window.localStorage.getItem('jwt-token');
+    return !!token;
+  }
+
   login(username: string, password: string) {
     const formData = new FormData();
 

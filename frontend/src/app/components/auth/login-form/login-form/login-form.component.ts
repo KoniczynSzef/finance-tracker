@@ -84,7 +84,7 @@ export class LoginFormComponent implements OnInit {
         });
 
         setTimeout(() => {
-          this.router.navigate(['/']);
+          this.router.navigate(['/dashboard']);
         }, 300);
       },
       error: (err: ResponseError) => {
