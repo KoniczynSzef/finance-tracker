@@ -1,11 +1,23 @@
 <form
-  class="form flex flex-col border border-slate-800 rounded-md p-8 gap-16 items-center bg-black"
+  class="form flex flex-col border border-slate-800 rounded-md p-8 gap-12 items-center bg-black"
   [formGroup]="loginFormGroup"
   (ngSubmit)="onSubmit()"
 >
   <h2 class="text-left text-2xl font-bold text-slate-200">
     Sign in to your account
   </h2>
+
+  <div class="flex flex-col gap-4 items-center w-full">
+    <p class="ml-auto text-slate-400">Don't have an account yet?</p>
+    <a
+      routerLink="/register"
+      severity="secondary"
+      pButton
+      label="Sign up"
+      class="ml-auto"
+    ></a>
+  </div>
+
   <div class="flex flex-col gap-4">
     <input
       pInputText
