@@ -1,9 +1,4 @@
 <div class="card flex rounded-lg">
-  <app-form-card
-    title="Welcome to Finance Tracker!"
-    description="Sign up to your account"
-  />
-
   <app-form-wrapper [formGroup]="registerFormGroup" (submitOutput)="onSubmit()">
     <h2 class="text-left text-2xl font-bold text-slate-200">
       Sign up to your account
@@ -17,9 +12,18 @@
         formControlName="username"
       />
 
-      <input pInputText type="email" placeholder="Email..." />
+      <input
+        pInputText
+        type="email"
+        placeholder="Email..."
+        formControlName="email"
+      />
 
-      <p-password placeholder="Password..." [toggleMask]="true" />
+      <p-password
+        placeholder="Password..."
+        [toggleMask]="true"
+        formControlName="password"
+      />
     </div>
 
     <button
@@ -36,6 +40,11 @@
       href="/login"
     ></app-form-redirect-action>
   </app-form-wrapper>
+  <app-form-card
+    title="Welcome to Finance Tracker!"
+    description="Sign up to your account"
+    class="skew-y-2 rounded-l-2xl rounded-r-lg"
+  />
 </div>
 
 <p-toast />
