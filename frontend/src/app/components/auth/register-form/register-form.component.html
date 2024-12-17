@@ -4,9 +4,7 @@
     description="Sign up to your account"
   />
 
-  <form
-    class="form flex flex-col border border-slate-800 rounded-r-md p-8 gap-12 items-center bg-black"
-  >
+  <app-form-wrapper [formGroup]="registerFormGroup" (submitOutput)="onSubmit()">
     <h2 class="text-left text-2xl font-bold text-slate-200">
       Sign up to your account
     </h2>
@@ -18,12 +16,10 @@
         placeholder="Username..."
         formControlName="username"
       />
-      <p-password
-        placeholder="Password..."
-        [feedback]="false"
-        [toggleMask]="true"
-        formControlName="password"
-      />
+
+      <input pInputText type="email" placeholder="Email..." />
+
+      <p-password placeholder="Password..." [toggleMask]="true" />
     </div>
 
     <button
@@ -33,5 +29,13 @@
       [label]="isSubmitting ? 'Loading...' : 'Sign up'"
       [disabled]="isSubmitting || registerFormGroup.invalid"
     ></button>
-  </form>
+
+    <app-form-redirect-action
+      title="Already have an account?"
+      buttonLabel="Sign in"
+      href="/login"
+    ></app-form-redirect-action>
+  </app-form-wrapper>
 </div>
+
+<p-toast />

@@ -12,4 +12,5 @@ import { ButtonModule } from 'primeng/button';
 export class FormRedirectActionComponent {
   @Input() title = '';
   @Input() buttonLabel = '';
+  @Input() href = '';
 }

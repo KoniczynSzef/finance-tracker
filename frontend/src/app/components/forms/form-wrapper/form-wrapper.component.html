@@ -1,0 +1,7 @@
+<form
+  class="form flex flex-col border border-slate-800 rounded-r-md p-16 gap-12 items-center bg-black"
+  (ngSubmit)="emitSubmit()"
+  [formGroup]="formGroup"
+>
+  <ng-content></ng-content>
+</form>

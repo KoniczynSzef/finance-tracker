@@ -1,10 +1,7 @@
 <div class="card flex rounded-lg">
   <app-form-card title="Welcome back!" description="Sign in to your account" />
-  <form
-    class="form flex flex-col border border-slate-800 rounded-r-md p-16 gap-12 items-center bg-black"
-    [formGroup]="loginFormGroup"
-    (ngSubmit)="onSubmit()"
-  >
+
+  <app-form-wrapper [formGroup]="loginFormGroup" (submitOutput)="onSubmit()">
     <h2 class="text-left text-2xl font-bold text-slate-200">
       Sign in to your account
     </h2>
@@ -35,8 +32,9 @@
     <app-form-redirect-action
       title="No account?"
       buttonLabel="Sign up"
+      href="/register"
     ></app-form-redirect-action>
-  </form>
+  </app-form-wrapper>
 </div>
 
 <p-toast />

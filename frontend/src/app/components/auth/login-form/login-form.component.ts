@@ -16,6 +16,7 @@ import { AuthService } from '../../../../auth/auth.service';
 import { ResponseError } from '../../../../types/auth/response-error.type';
 import { FormCardComponent } from '../../forms/form-card/form-card.component';
 import { FormRedirectActionComponent } from '../../forms/form-redirect-action/form-redirect-action.component';
+import { FormWrapperComponent } from '../../forms/form-wrapper/form-wrapper.component';
 
 @Component({
   selector: 'app-login-form',
@@ -29,6 +30,7 @@ import { FormRedirectActionComponent } from '../../forms/form-redirect-action/fo
     RouterModule,
     FormCardComponent,
     FormRedirectActionComponent,
+    FormWrapperComponent,
   ],
   providers: [MessageService],
   templateUrl: './login-form.component.html',
