@@ -1,7 +1,7 @@
 <div class="card flex rounded-lg">
   <app-form-card title="Welcome back!" description="Sign in to your account" />
   <form
-    class="form flex flex-col border border-slate-800 rounded-r-md p-8 gap-12 items-center bg-black"
+    class="form flex flex-col border border-slate-800 rounded-r-md p-16 gap-12 items-center bg-black"
     [formGroup]="loginFormGroup"
     (ngSubmit)="onSubmit()"
   >
@@ -31,6 +31,12 @@
       [label]="isSubmitting ? 'Loading...' : 'Sign in'"
       [disabled]="isSubmitting || loginFormGroup.invalid"
     ></button>
+
+    <app-form-redirect-action
+      title="No account?"
+      buttonLabel="Sign up"
+    ></app-form-redirect-action>
   </form>
-  <p-toast />
 </div>
+
+<p-toast />

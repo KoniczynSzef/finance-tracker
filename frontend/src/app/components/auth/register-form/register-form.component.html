@@ -1,1 +1,37 @@
-<p>register-form works!</p>
+<div class="card flex rounded-lg">
+  <app-form-card
+    title="Welcome to Finance Tracker!"
+    description="Sign up to your account"
+  />
+
+  <form
+    class="form flex flex-col border border-slate-800 rounded-r-md p-8 gap-12 items-center bg-black"
+  >
+    <h2 class="text-left text-2xl font-bold text-slate-200">
+      Sign up to your account
+    </h2>
+
+    <div class="flex flex-col gap-4">
+      <input
+        pInputText
+        type="text"
+        placeholder="Username..."
+        formControlName="username"
+      />
+      <p-password
+        placeholder="Password..."
+        [feedback]="false"
+        [toggleMask]="true"
+        formControlName="password"
+      />
+    </div>
+
+    <button
+      pButton
+      type="submit"
+      class="w-full text-white"
+      [label]="isSubmitting ? 'Loading...' : 'Sign up'"
+      [disabled]="isSubmitting || registerFormGroup.invalid"
+    ></button>
+  </form>
+</div>
