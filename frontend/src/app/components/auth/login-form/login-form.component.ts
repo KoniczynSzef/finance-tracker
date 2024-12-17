@@ -14,6 +14,7 @@ import { Toast } from 'primeng/toast';
 import { catchError, of } from 'rxjs';
 import { AuthService } from '../../../../auth/auth.service';
 import { ResponseError } from '../../../../types/auth/response-error.type';
+import { FormCardComponent } from "../../forms/form-card/form-card.component";
 
 @Component({
   selector: 'app-login-form',
@@ -25,7 +26,8 @@ import { ResponseError } from '../../../../types/auth/response-error.type';
     ButtonModule,
     Toast,
     RouterModule,
-  ],
+    FormCardComponent
+],
   providers: [MessageService],
   templateUrl: './login-form.component.html',
   styleUrl: './login-form.component.scss',
