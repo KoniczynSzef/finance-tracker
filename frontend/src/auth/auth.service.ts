@@ -38,16 +38,30 @@ export class AuthService {
   register(payload: Register) {
     const formData = new FormData();
 
-    formData.append('username', payload.username);
-    formData.append('email', payload.email);
-    formData.append('password', payload.password);
+    for (const [key, value] of Object.entries(payload)) {
+      formData.append(key, value);
+    }
 
-    return this.httpClient.post<Token>(
+    return this.httpClient.post<UserRead>(
       `${this.API_URL}/auth/register`,
       formData,
       {
         headers: new HttpHeaders({ Accept: 'application/json' }),
       }
     );
+  }
+
+  saveToken(token: Token) {
+    window.localStorage.setItem('jwt-token', token.access_token);
+  }
+
+  isAuthenticated() {
+    const token = window.localStorage.getItem('jwt-token');
+
+    return !!token;
+  }
+
+  logout() {
+    window.localStorage.removeItem('jwt-token');
   }
 }

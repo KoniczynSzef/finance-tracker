@@ -1,8 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
-import { AuthService } from '../../../auth/auth.service';
-import { User } from '../../../types/models/user.type';
+import { UserStore } from '../../../store/user.store';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,22 +9,6 @@ import { User } from '../../../types/models/user.type';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
-export class DashboardComponent implements OnInit {
-  user: User | null = null;
-  constructor(private authService: AuthService, private router: Router) {}
-
-  ngOnInit() {
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
-    }
-
-    this.authService.getCurrentUser().subscribe((user) => {
-      this.user = user;
-    });
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
+export class DashboardComponent {
+  readonly userStore = inject(UserStore);
 }
