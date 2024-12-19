@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -32,7 +32,7 @@ import { FormWrapperComponent } from '../../forms/form-wrapper/form-wrapper.comp
   styleUrl: './register-form.component.scss',
 })
 export class RegisterFormComponent {
-  isSubmitting = false;
+  isSubmitting = signal(false);
   registerFormGroup: FormGroup;
   value: string = '';
 

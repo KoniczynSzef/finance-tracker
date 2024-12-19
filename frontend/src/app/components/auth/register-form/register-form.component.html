@@ -30,8 +30,8 @@
       pButton
       type="submit"
       class="w-full text-white"
-      [label]="isSubmitting ? 'Loading...' : 'Sign up'"
-      [disabled]="isSubmitting || registerFormGroup.invalid"
+      [label]="isSubmitting() ? 'Loading...' : 'Sign up'"
+      [disabled]="isSubmitting() || registerFormGroup.invalid"
     ></button>
 
     <app-form-redirect-action
