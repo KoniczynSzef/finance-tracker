@@ -11,6 +11,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { Toast } from 'primeng/toast';
+import { catchError, of } from 'rxjs';
 import { AuthService } from '../../../../auth/auth.service';
 import { UserStore } from '../../../../store/user.store';
 import { Login, LoginForm } from '../../../../types/auth/login.type';
@@ -82,8 +83,24 @@ export class LoginFormComponent {
     this.authService.login(payload).subscribe((token) => {
       this.authService.saveToken(token);
 
-      this.authService.getCurrentUser().subscribe((user) => {
-        if (user) {
+      this.authService
+        .getCurrentUser()
+        .pipe(
+          catchError(() => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Invalid username or password.',
+            });
+
+            this.isSubmitting.set(false);
+
+            return of(null);
+          })
+        )
+        .subscribe((user) => {
+          if (!user) return;
+
           this.userStore.setUser(user);
           this.messageService.add({
             severity: 'success',
@@ -94,8 +111,7 @@ export class LoginFormComponent {
           setTimeout(() => {
             this.router.navigate(['/dashboard']);
           }, 500);
-        }
-      });
+        });
     });
   }
 }

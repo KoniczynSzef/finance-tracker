@@ -1,15 +1,21 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
-  FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { Toast } from 'primeng/toast';
+import { catchError, of } from 'rxjs';
+import { AuthService } from '../../../../auth/auth.service';
+import { UserStore } from '../../../../store/user.store';
+import { Register, RegisterForm } from '../../../../types/auth/register.type';
+import { passwordPattern } from '../../../../utils/password-pattern';
 import { FormCardComponent } from '../../forms/form-card/form-card.component';
 import { FormRedirectActionComponent } from '../../forms/form-redirect-action/form-redirect-action.component';
 import { FormWrapperComponent } from '../../forms/form-wrapper/form-wrapper.component';
@@ -33,22 +39,39 @@ import { FormWrapperComponent } from '../../forms/form-wrapper/form-wrapper.comp
 })
 export class RegisterFormComponent {
   isSubmitting = signal(false);
-  registerFormGroup: FormGroup;
-  value: string = '';
+  userStore = inject(UserStore);
+
+  registerFormGroup = new FormGroup<RegisterForm>({
+    username: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    email: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
+    password: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(passwordPattern),
+      ],
+    }),
+  });
 
   constructor(
-    private formBuilder: FormBuilder,
-    private messageService: MessageService
-  ) {
-    this.registerFormGroup = this.formBuilder.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-    });
-  }
+    private messageService: MessageService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   onSubmit() {
-    if (this.registerFormGroup.invalid) {
+    this.isSubmitting.set(true);
+
+    const payload = this.registerFormGroup.value;
+
+    if (!payload.username || !payload.email || !payload.password) {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
@@ -58,5 +81,50 @@ export class RegisterFormComponent {
 
       return;
     }
+
+    const userData: Register = {
+      username: payload.username,
+      password: payload.password,
+      email: payload.email,
+
+      // * These fields are not essential for the registration, they will have default values
+      full_name: '',
+      current_balance: 0,
+      balance_threshold: 0,
+    };
+
+    this.authService
+      .register(userData)
+      .pipe(
+        catchError(() => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'There was an error registering the user.',
+            life: 3000,
+          });
+
+          this.isSubmitting.set(false);
+
+          return of(null);
+        })
+      )
+      .subscribe((user) => {
+        if (!user) return;
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'User registered successfully!',
+          life: 3000,
+        });
+
+        this.userStore.setUser(user);
+        this.isSubmitting.set(false);
+
+        setTimeout(() => {
+          this.router.navigate(['/dashboard']);
+        }, 500);
+      });
   }
 }
