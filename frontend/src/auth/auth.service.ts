@@ -36,15 +36,9 @@ export class AuthService {
   }
 
   register(payload: Register) {
-    const formData = new FormData();
-
-    for (const [key, value] of Object.entries(payload)) {
-      formData.append(key, value);
-    }
-
     return this.httpClient.post<UserRead>(
       `${this.API_URL}/auth/register`,
-      formData,
+      payload,
       {
         headers: new HttpHeaders({ Accept: 'application/json' }),
       }

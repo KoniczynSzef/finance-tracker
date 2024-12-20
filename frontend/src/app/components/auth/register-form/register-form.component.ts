@@ -96,7 +96,9 @@ export class RegisterFormComponent {
     this.authService
       .register(userData)
       .pipe(
-        catchError(() => {
+        catchError((err) => {
+          console.log(err);
+
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
@@ -105,6 +107,7 @@ export class RegisterFormComponent {
           });
 
           this.isSubmitting.set(false);
+          console.log(this.registerFormGroup.value);
 
           return of(null);
         })

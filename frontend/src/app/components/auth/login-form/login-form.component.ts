@@ -86,7 +86,9 @@ export class LoginFormComponent {
       this.authService
         .getCurrentUser()
         .pipe(
-          catchError(() => {
+          catchError((err) => {
+            console.log(err);
+
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
