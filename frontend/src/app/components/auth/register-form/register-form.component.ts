@@ -122,6 +122,14 @@ export class RegisterFormComponent {
           life: 3000,
         });
 
+        if (!payload.password) return;
+
+        this.authService
+          .login({ username: user.username, password: payload.password })
+          .subscribe((token) => {
+            this.authService.saveToken(token);
+          });
+
         this.userStore.setUser(user);
         this.isSubmitting.set(false);
 
