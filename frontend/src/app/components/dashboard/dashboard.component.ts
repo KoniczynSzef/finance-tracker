@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
-import { UserStore } from '../../../store/user.store';
+import { UserStateService } from '../../../store/user-state.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,5 +10,7 @@ import { UserStore } from '../../../store/user.store';
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent {
-  readonly userStore = inject(UserStore);
+  userStateService = inject(UserStateService);
+
+  user = this.userStateService.state$().user;
 }

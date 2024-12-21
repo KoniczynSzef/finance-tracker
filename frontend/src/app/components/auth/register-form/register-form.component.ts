@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -13,7 +13,7 @@ import { PasswordModule } from 'primeng/password';
 import { Toast } from 'primeng/toast';
 import { catchError, of } from 'rxjs';
 import { AuthService } from '../../../../auth/auth.service';
-import { UserStore } from '../../../../store/user.store';
+import { UserStateService } from '../../../../store/user-state.service';
 import { Register, RegisterForm } from '../../../../types/auth/register.type';
 import { passwordPattern } from '../../../../utils/password-pattern';
 import { FormCardComponent } from '../../forms/form-card/form-card.component';
@@ -39,7 +39,6 @@ import { FormWrapperComponent } from '../../forms/form-wrapper/form-wrapper.comp
 })
 export class RegisterFormComponent {
   isSubmitting = signal(false);
-  userStore = inject(UserStore);
 
   registerFormGroup = new FormGroup<RegisterForm>({
     username: new FormControl('', {
@@ -63,7 +62,8 @@ export class RegisterFormComponent {
   constructor(
     private messageService: MessageService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private userStateService: UserStateService
   ) {}
 
   onSubmit() {
@@ -130,7 +130,7 @@ export class RegisterFormComponent {
             this.authService.saveToken(token);
           });
 
-        this.userStore.setUser(user);
+        this.userStateService.setUser(user);
         this.isSubmitting.set(false);
 
         setTimeout(() => {

@@ -1,8 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { AuthService } from '../auth/auth.service';
-import { UserStore } from '../store/user.store';
+import { UserStateService } from '../store/user-state.service';
 
 @Component({
   selector: 'app-root',
@@ -11,16 +10,8 @@ import { UserStore } from '../store/user.store';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'frontend';
-  userStore = inject(UserStore);
-  constructor(private authService: AuthService) {}
 
-  ngOnInit() {
-    this.authService.getCurrentUser().subscribe((user) => {
-      if (user) {
-        this.userStore.setUser(user);
-      }
-    });
-  }
+  constructor(private userStateService: UserStateService) {}
 }

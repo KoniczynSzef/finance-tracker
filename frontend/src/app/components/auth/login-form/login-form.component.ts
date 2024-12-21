@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -13,7 +13,7 @@ import { PasswordModule } from 'primeng/password';
 import { Toast } from 'primeng/toast';
 import { catchError, of } from 'rxjs';
 import { AuthService } from '../../../../auth/auth.service';
-import { UserStore } from '../../../../store/user.store';
+import { UserStateService } from '../../../../store/user-state.service';
 import { Login, LoginForm } from '../../../../types/auth/login.type';
 import { FormCardComponent } from '../../forms/form-card/form-card.component';
 import { FormRedirectActionComponent } from '../../forms/form-redirect-action/form-redirect-action.component';
@@ -38,7 +38,6 @@ import { FormWrapperComponent } from '../../forms/form-wrapper/form-wrapper.comp
   styleUrl: './login-form.component.scss',
 })
 export class LoginFormComponent {
-  userStore = inject(UserStore);
   isSubmitting = signal(false);
 
   loginFormGroup = new FormGroup<LoginForm>({
@@ -55,7 +54,8 @@ export class LoginFormComponent {
   constructor(
     private messageService: MessageService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private userStateService: UserStateService
   ) {}
 
   onSubmit() {
@@ -103,7 +103,7 @@ export class LoginFormComponent {
         .subscribe((user) => {
           if (!user) return;
 
-          this.userStore.setUser(user);
+          this.userStateService.setUser(user);
           this.messageService.add({
             severity: 'success',
             summary: 'Success',
