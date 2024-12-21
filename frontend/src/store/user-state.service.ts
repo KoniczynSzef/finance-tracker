@@ -28,7 +28,10 @@ export class UserStateService {
         })
       )
       .subscribe((user) => {
-        this.state.set({ user, isLoaded: true });
+        if (!user) return;
+
+        this.setUser(user);
+        console.log(this.state$());
       });
   }
 

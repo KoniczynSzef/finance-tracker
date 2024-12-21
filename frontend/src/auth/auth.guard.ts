@@ -7,6 +7,8 @@ export function redirectToLoginIfNotAuthenticated(): CanActivateFn {
     const user = inject(UserStateService).state$().user;
     const router = inject(Router);
 
+    console.log(user);
+
     if (!user) {
       // * Redirect to login page
       return router.parseUrl('/login');
