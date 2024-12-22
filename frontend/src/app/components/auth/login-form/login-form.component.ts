@@ -80,29 +80,28 @@ export class LoginFormComponent {
       password,
     };
 
-    this.authService.login(payload).subscribe((token) => {
-      this.authService.saveToken(token);
+    this.authService
+      .login(payload)
+      .pipe(
+        catchError((err) => {
+          console.log(err);
 
-      this.authService
-        .getCurrentUser()
-        .pipe(
-          catchError((err) => {
-            console.log(err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Invalid username or password.',
+          });
 
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'Invalid username or password.',
-            });
+          this.isSubmitting.set(false);
 
-            this.isSubmitting.set(false);
+          return of(null);
+        })
+      )
+      .subscribe((token) => {
+        if (!token) return;
+        this.authService.saveToken(token);
 
-            return of(null);
-          })
-        )
-        .subscribe((user) => {
-          if (!user) return;
-
+        this.authService.getCurrentUser().subscribe((user) => {
           this.userStateService.setUser(user);
           this.messageService.add({
             severity: 'success',
@@ -111,9 +110,9 @@ export class LoginFormComponent {
           });
 
           setTimeout(() => {
-            this.router.navigate(['/dashboard']);
+            this.userStateService.navigateToDashboard();
           }, 500);
         });
-    });
+      });
   }
 }

@@ -1,17 +1,15 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn } from '@angular/router';
 import { UserStateService } from '../store/user-state.service';
 
 export function redirectToLoginIfNotAuthenticated(): CanActivateFn {
   return () => {
-    const user = inject(UserStateService).state$().user;
-    const router = inject(Router);
-
-    console.log(user);
+    const userStateService = inject(UserStateService);
+    const user = userStateService.state$().user;
 
     if (!user) {
       // * Redirect to login page
-      return router.parseUrl('/login');
+      userStateService.navigateToLogin();
     }
 
     return true;
@@ -20,12 +18,12 @@ export function redirectToLoginIfNotAuthenticated(): CanActivateFn {
 
 export function redirectToDashboardIfAuthenticated(): CanActivateFn {
   return () => {
-    const user = inject(UserStateService).state$().user;
-    const router = inject(Router);
+    const userStateService = inject(UserStateService);
+    const user = userStateService.state$().user;
 
     if (user) {
       // * Redirect to dashboard page
-      return router.parseUrl('/dashboard');
+      userStateService.navigateToDashboard();
     }
 
     return true;

@@ -31,4 +31,8 @@ export class UserStateService {
       this.router.navigateByUrl('/dashboard');
     }
   }
+
+  navigateToLogin() {
+    this.router.navigateByUrl('/login');
+  }
 }

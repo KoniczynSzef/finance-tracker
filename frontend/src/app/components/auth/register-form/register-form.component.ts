@@ -134,7 +134,7 @@ export class RegisterFormComponent {
         this.isSubmitting.set(false);
 
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
+          this.userStateService.navigateToDashboard();
         }, 500);
       });
   }
