@@ -1,4 +1,6 @@
 <p>
   {{ user?.username }}
 </p>
-<p-button severity="danger" label="Logout"></p-button>
+<p-button severity="danger" label="Logout" (onClick)="logout()"></p-button>
+
+<p-toast />
