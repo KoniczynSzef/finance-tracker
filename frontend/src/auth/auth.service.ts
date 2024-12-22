@@ -47,10 +47,14 @@ export class AuthService {
     window.localStorage.setItem('jwt-token', token.access_token);
   }
 
-  isAuthenticated() {
+  getAuthenticationToken() {
     const token = window.localStorage.getItem('jwt-token');
 
-    return !!token;
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+
+    return token;
   }
 
   logout() {

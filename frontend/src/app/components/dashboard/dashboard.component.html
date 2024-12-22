@@ -2,5 +2,10 @@
   {{ user?.username }}
 </p>
 <p-button severity="danger" label="Logout" (onClick)="logout()"></p-button>
+<p-button
+  severity="success"
+  label="Get all transactions"
+  (onClick)="getAllTransactions()"
+></p-button>
 
 <p-toast />
