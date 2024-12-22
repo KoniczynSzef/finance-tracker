@@ -4,7 +4,6 @@ import { environment } from '../environments/environment.development';
 import { Login } from '../types/auth/login.type';
 import { Register } from '../types/auth/register.type';
 import { Token } from '../types/auth/token.type';
-import { User } from '../types/models/user.type';
 import { UserRead } from '../types/schemas/user-schemas.type';
 
 @Injectable({
@@ -12,7 +11,6 @@ import { UserRead } from '../types/schemas/user-schemas.type';
 })
 export class AuthService {
   API_URL = environment.apiUrl;
-  user: User | null = null;
 
   constructor(private httpClient: HttpClient) {}
 

@@ -23,16 +23,12 @@ export class UserStateService {
   }
 
   unsetUser() {
-    this.state.set({ user: null, isLoaded: false });
+    this.state.set({ user: null, isLoaded: true });
   }
 
   navigateToDashboard() {
     if (this.state$().user && this.state$().isLoaded) {
       this.router.navigateByUrl('/dashboard');
     }
-  }
-
-  navigateToLogin() {
-    this.router.navigateByUrl('/login');
   }
 }
