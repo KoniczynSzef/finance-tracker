@@ -1,6 +1,5 @@
-import { Injectable, signal } from '@angular/core';
-import { catchError, of } from 'rxjs';
-import { AuthService } from '../auth/auth.service';
+import { inject, Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { User } from '../types/models/user.type';
 
 export interface UserState {
@@ -12,27 +11,11 @@ export interface UserState {
   providedIn: 'root',
 })
 export class UserStateService {
+  router = inject(Router);
   private state = signal<UserState>({ user: null, isLoaded: false });
 
   get state$() {
     return this.state;
-  }
-
-  constructor(private authService: AuthService) {
-    this.authService
-      .getCurrentUser()
-      .pipe(
-        catchError(() => {
-          this.unsetUser();
-          return of(null);
-        })
-      )
-      .subscribe((user) => {
-        if (!user) return;
-
-        this.setUser(user);
-        console.log(this.state$());
-      });
   }
 
   setUser(user: User) {
@@ -41,5 +24,15 @@ export class UserStateService {
 
   unsetUser() {
     this.state.set({ user: null, isLoaded: false });
+  }
+
+  navigateToDashboard() {
+    if (this.state$().user && this.state$().isLoaded) {
+      this.router.navigateByUrl('/dashboard');
+    }
+  }
+
+  navigateToLogin() {
+    this.router.navigateByUrl('/login');
   }
 }
