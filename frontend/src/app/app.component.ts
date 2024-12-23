@@ -19,6 +19,13 @@ export class AppComponent implements OnInit {
   userStateService = inject(UserStateService);
 
   ngOnInit() {
+    try {
+      // * Get the token from local storage - it throws an error if it's not there
+      this.authService.getAuthenticationToken();
+    } catch (err) {
+      this.userStateService.navigateToLogin();
+    }
+
     this.authService
       .getCurrentUser()
       .pipe(
